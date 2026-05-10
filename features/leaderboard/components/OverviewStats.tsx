@@ -3,16 +3,20 @@
 // Right-hand summary card: total agents, active agents, total feedback.
 // Uses multi-chain stats endpoint so it reflects the currently filtered chain scope.
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Activity, Database, Users } from 'lucide-react';
 import { api, LeaderboardStats } from '@/shared/api/client';
+import { useChain } from '@/providers/ChainProvider';
 import { Skeleton } from '@/shared/ui/Skeleton';
+import { ChainBadge } from '@/shared/ui/ChainBadge';
 
 interface Props {
     chainIds: number[]; // empty = all chains
 }
 
 export default function OverviewStats({ chainIds }: Props) {
+    const { chains } = useChain();
+    const chainMap = useMemo(() => new Map(chains.map((c) => [c.chainId, c])), [chains]);
     const [stats, setStats] = useState<LeaderboardStats | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -29,7 +33,7 @@ export default function OverviewStats({ chainIds }: Props) {
 
     if (loading || !stats) {
         return (
-            <div className="bg-background/50 border border-border rounded-xl p-5 shadow-xl backdrop-blur-sm h-full flex flex-col gap-3 min-h-[340px]">
+            <div className="bg-card border border-border rounded-xl p-5 h-full flex flex-col gap-3 min-h-[340px]">
                 <Skeleton className="h-6 w-40 rounded-md" />
                 <div className="grid grid-cols-1 gap-3 mt-2">
                     {Array.from({ length: 3 }).map((_, i) => (
@@ -43,12 +47,18 @@ export default function OverviewStats({ chainIds }: Props) {
     const activePct = stats.totalAgents > 0 ? (stats.activeAgents / stats.totalAgents) * 100 : 0;
 
     return (
-        <div className="bg-background/50 border border-border rounded-xl p-5 shadow-xl backdrop-blur-sm h-full flex flex-col min-h-[340px]">
+        <div className="bg-card border border-border rounded-xl p-5 h-full flex flex-col min-h-[340px]">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
                 <h2 className="text-base font-bold text-white">Overview</h2>
-                <span className="text-xs text-muted">
-                    {chainIds.length === 0 ? 'All chains' : `${chainIds.length} chain${chainIds.length > 1 ? 's' : ''}`}
-                </span>
+                <div className="flex flex-wrap items-center justify-end gap-1.5 max-w-[min(100%,14rem)]">
+                    {chainIds.length === 0 ? (
+                        <span className="text-xs text-muted">All chains</span>
+                    ) : (
+                        chainIds.map((id) => (
+                            <ChainBadge key={id} chainId={id} chain={chainMap.get(id)} size="sm" />
+                        ))
+                    )}
+                </div>
             </div>
 
             <div className="grid grid-cols-1 gap-3 flex-1">

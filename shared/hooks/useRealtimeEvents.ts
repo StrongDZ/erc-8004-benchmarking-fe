@@ -25,7 +25,7 @@ function keyOf(ev: RealtimeEvent): string {
     return `${ev.chainId}:${ev.txHash}:${ev.logIndex ?? 0}`;
 }
 
-export function useRealtimeEvents(maxItems = 30): {
+export function useRealtimeEvents(maxItems = 4): {
     events: RealtimeEvent[];
     clear: () => void;
 } {

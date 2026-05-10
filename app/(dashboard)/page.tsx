@@ -1,23 +1,25 @@
-'use client';
-// app/(dashboard)/page.tsx — 4-row dashboard.
+"use client";
+// app/(dashboard)/page.tsx — dashboard.
 // Row 1: Realtime Event Feed + Overview Stats
 // Row 2: New Agents horizontal strip
-// Row 3: Filters (multi-select)
-// Row 4: Agents table (Name | Chain | Service | Score | Feedback | Owner | Created)
+// Row 3: Rising Stars
+// Row 4: Filters (multi-select)
+// Row 5: Agents table (Name | Chain | Service | Score | Feedback | Owner | Created)
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Search } from 'lucide-react';
-import { api, LeaderboardAgent, LeaderboardQuery } from '@/shared/api/client';
-import { useChain } from '@/providers/ChainProvider';
-import { Button } from '@/shared/ui/Button';
-import { Badge } from '@/shared/ui/Badge';
-import RealtimeEventFeed from '@/features/leaderboard/components/RealtimeEventFeed';
-import OverviewStats from '@/features/leaderboard/components/OverviewStats';
-import NewAgentsStrip from '@/features/leaderboard/components/NewAgentsStrip';
-import DashboardFilters, { DashboardFilterValue } from '@/features/leaderboard/components/DashboardFilters';
-import AgentsTable from '@/features/leaderboard/components/AgentsTable';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Search } from "lucide-react";
+import { api, LeaderboardAgent, LeaderboardQuery } from "@/shared/api/client";
+import { useChain } from "@/providers/ChainProvider";
+import { Badge } from "@/shared/ui/Badge";
+import RealtimeEventFeed from "@/features/leaderboard/components/RealtimeEventFeed";
+import OverviewStats from "@/features/leaderboard/components/OverviewStats";
+import NewAgentsStrip from "@/features/leaderboard/components/NewAgentsStrip";
+import RisingStars from "@/features/leaderboard/components/RisingStars";
+import DashboardFilters, { DashboardFilterValue } from "@/features/leaderboard/components/DashboardFilters";
+import AgentsTable from "@/features/leaderboard/components/AgentsTable";
+import PageNavigation from "@/shared/ui/PageNavigation";
 
-type SortKey = NonNullable<LeaderboardQuery['sort']>;
+type SortKey = NonNullable<LeaderboardQuery["sort"]>;
 
 const EMPTY_FILTER: DashboardFilterValue = {
     chainIds: [],
@@ -32,10 +34,10 @@ export default function HomePage() {
     const { chains } = useChain();
 
     const [filter, setFilter] = useState<DashboardFilterValue>(EMPTY_FILTER);
-    const [query, setQuery] = useState('');
-    const [sort, setSort] = useState<SortKey>('score_desc');
+    const [query, setQuery] = useState("");
+    const [sort, setSort] = useState<SortKey>("score_desc");
     const [page, setPage] = useState(1);
-    const [limit] = useState(50);
+    const [limit] = useState(10);
 
     const [agents, setAgents] = useState<LeaderboardAgent[]>([]);
     const [total, setTotal] = useState(0);
@@ -44,10 +46,7 @@ export default function HomePage() {
     // effective chain scope — empty means "all chains" for stats & new-agents queries.
     const effectiveChainIds = filter.chainIds;
 
-    const queryKey = useMemo(
-        () => JSON.stringify({ filter, query, sort, page, limit }),
-        [filter, query, sort, page, limit],
-    );
+    const queryKey = useMemo(() => JSON.stringify({ filter, query, sort, page, limit }), [filter, query, sort, page, limit]);
 
     const loadAgents = useCallback(async () => {
         setLoading(true);
@@ -73,21 +72,29 @@ export default function HomePage() {
         setLoading(false);
     }, [filter, query, sort, page, limit]);
 
-    useEffect(() => { loadAgents(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [queryKey]);
+    useEffect(() => {
+        loadAgents(); /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    }, [queryKey]);
 
     // Reset page when filters/search/sort change.
-    useEffect(() => { setPage(1); }, [filter, query, sort]);
+    useEffect(() => {
+        setPage(1);
+    }, [filter, query, sort]);
 
     const totalPages = Math.max(1, Math.ceil(total / limit));
     const activeFilterCount =
-        filter.chainIds.length + filter.services.length + filter.oasfSkills.length +
-        filter.oasfDomains.length + filter.tags.length + (filter.x402 !== undefined ? 1 : 0);
+        filter.chainIds.length +
+        filter.services.length +
+        filter.oasfSkills.length +
+        filter.oasfDomains.length +
+        filter.tags.length +
+        (filter.x402 !== undefined ? 1 : 0);
 
     return (
         <div className="container max-w-[1400px] mx-auto px-4 md:px-8 py-8 fade-in">
             {/* Page header */}
             <header className="mb-8">
-                <h1 className="text-3xl md:text-4xl font-bold font-heading mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                <h1 className="text-3xl md:text-4xl font-bold font-heading mb-2 text-white">
                     Agent Dashboard
                 </h1>
                 <p className="text-muted text-sm max-w-2xl">
@@ -110,19 +117,24 @@ export default function HomePage() {
                 <NewAgentsStrip chainIds={effectiveChainIds} />
             </div>
 
-            {/* Row 3: Filters */}
+            {/* Row 3: Rising Stars */}
             <div className="mb-6">
+                <RisingStars chainIds={effectiveChainIds} />
+            </div>
+
+            {/* Row 5: Filters — stack above table card so MultiSelect dropdowns paint over the table */}
+            <div className="relative z-20 mb-6">
                 <DashboardFilters chains={chains} value={filter} onChange={setFilter} />
             </div>
 
-            {/* Row 4: Agents table */}
-            <div className="bg-background/50 border border-border rounded-xl p-4 md:p-5 shadow-xl backdrop-blur-sm">
+            {/* Row 6: Agents table */}
+            <div className="relative z-0 bg-card border border-border rounded-xl p-4 md:p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-white/5">
                     <div className="flex bg-black/40 border border-border rounded-md px-3 py-2 items-center flex-1 min-w-[240px] max-w-sm focus-within:border-primary transition-colors">
                         <Search size={14} className="text-muted shrink-0 mr-2" />
                         <input
                             className="bg-transparent border-none outline-none text-white w-full placeholder:text-muted/60 text-sm"
-                            placeholder="Search by name or description…"
+                            placeholder="Search name, agent ID, OASF skill or domain…"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                         />
@@ -138,55 +150,27 @@ export default function HomePage() {
                             <option value="tasks_desc">Most Feedback</option>
                             <option value="recent">Newest</option>
                         </select>
-                        <span className="text-sm text-muted font-medium">
-                            {loading ? 'Loading…' : `${total.toLocaleString()} agents`}
-                        </span>
-                        {activeFilterCount > 0 && (
-                            <Badge variant="accent">Filtered</Badge>
-                        )}
+                        <span className="text-sm text-muted font-medium">{loading ? "Loading…" : `${total.toLocaleString()} agents`}</span>
+                        {activeFilterCount > 0 && <Badge variant="accent">Filtered</Badge>}
                     </div>
                 </div>
 
-                <AgentsTable agents={agents} chains={chains} loading={loading} />
-
-                {totalPages > 1 && (
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t border-border">
-                        <div className="flex gap-1 text-sm">
-                            <Button
-                                variant="outline"
-                                className="border-border text-muted hover:text-white disabled:opacity-30"
-                                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                disabled={page === 1}
-                            >
-                                Prev
-                            </Button>
-                            {Array.from({ length: Math.min(totalPages, 7) }).map((_, i) => {
-                                const p = i + 1;
-                                return (
-                                    <button
-                                        key={p}
-                                        className={`w-8 py-1.5 rounded-md transition-all ${page === p ? 'bg-primary text-black font-bold' : 'text-muted hover:text-white hover:bg-white/5'}`}
-                                        onClick={() => setPage(p)}
-                                    >
-                                        {p}
-                                    </button>
-                                );
-                            })}
-                            {totalPages > 7 && <span className="px-2 py-1.5 text-muted">…</span>}
-                            <Button
-                                variant="outline"
-                                className="border-border text-muted hover:text-white disabled:opacity-30"
-                                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                                disabled={page === totalPages}
-                            >
-                                Next
-                            </Button>
-                        </div>
-                        <span className="text-sm text-subtle font-medium">
-                            Page {page} of {totalPages}
-                        </span>
+                <div className="flex flex-col">
+                    <div className="min-h-0">
+                        <AgentsTable agents={agents} chains={chains} loading={loading} pageSize={limit} />
                     </div>
-                )}
+
+                    {/* Fixed slot so pagination never rides up when a page has fewer rows */}
+                    {total > 0 && (
+                        <PageNavigation
+                            className="mt-6 border-t border-border pt-4"
+                            page={page}
+                            totalPages={totalPages}
+                            loading={loading}
+                            onPageChange={setPage}
+                        />
+                    )}
+                </div>
             </div>
         </div>
     );

@@ -6,22 +6,27 @@ import { api, RisingStar } from '@/shared/api/client';
 import { Badge } from '@/shared/ui/Badge';
 import { Skeleton } from '@/shared/ui/Skeleton';
 
-interface Props { chainId: number; }
+interface Props { chainIds: number[]; }
 
 const PERIODS = ['24h', '7d', '30d'] as const;
 
-export default function RisingStars({ chainId }: Props) {
+export default function RisingStars({ chainIds }: Props) {
   const [data, setData] = useState<RisingStar[]>([]);
   const [period, setPeriod] = useState<string>('24h');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (chainIds.length === 0) {
+      setData([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
-    api.risingStars(chainId, period).then(r => {
+    api.risingStarsMulti(chainIds, period, 10).then(r => {
       if (r.success) setData(r.data ?? []);
       setLoading(false);
     });
-  }, [chainId, period]);
+  }, [chainIds, period]);
 
   return (
     <div className="card p-4">
@@ -30,7 +35,7 @@ export default function RisingStars({ chainId }: Props) {
           <Rocket size={18} color="var(--color-primary)" />
           <span>Rising Stars</span>
         </div>
-        <div className="flex gap-1 bg-black/40 p-1 rounded-md">
+        <div className="flex gap-1 bg-white/5 p-1 rounded-md border border-border">
           {PERIODS.map(p => (
             <button
               key={p}
@@ -48,13 +53,13 @@ export default function RisingStars({ chainId }: Props) {
       </div>
 
       {loading ? (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 min-h-[220px]">
           {Array.from({ length: 5 }).map((_, i) => (
             <Skeleton key={i} className="h-10 w-full rounded-md" />
           ))}
         </div>
       ) : (
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 min-h-[220px]">
           {data.map((star, idx) => (
             <Link
               key={star.agentId}

@@ -4,11 +4,14 @@
 // currently selected chain scope. Clicks navigate to the agent profile.
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api, LeaderboardAgent, resolveIPFS } from '@/shared/api/client';
+import { useChain } from '@/providers/ChainProvider';
+import { FALLBACK_AVATAR_DATA_URI } from '@/shared/constants/app';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { Badge } from '@/shared/ui/Badge';
+import { ChainBadge } from '@/shared/ui/ChainBadge';
 
 interface Props {
     chainIds: number[];
@@ -16,7 +19,7 @@ interface Props {
 }
 
 function fallbackImg(e: React.SyntheticEvent<HTMLImageElement>) {
-    (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect width="100" height="100" fill="%231E293B"/%3E%3C/svg%3E';
+    (e.target as HTMLImageElement).src = FALLBACK_AVATAR_DATA_URI;
 }
 
 function relativeTime(createdAt?: number): string {
@@ -31,6 +34,8 @@ function relativeTime(createdAt?: number): string {
 }
 
 export default function NewAgentsStrip({ chainIds, limit = 8 }: Props) {
+    const { chains } = useChain();
+    const chainMap = useMemo(() => new Map(chains.map((c) => [c.chainId, c])), [chains]);
     const [agents, setAgents] = useState<LeaderboardAgent[]>([]);
     const [loading, setLoading] = useState(true);
     const [scrollEl, setScrollEl] = useState<HTMLDivElement | null>(null);
@@ -49,7 +54,7 @@ export default function NewAgentsStrip({ chainIds, limit = 8 }: Props) {
     function scrollBy(dx: number) { scrollEl?.scrollBy({ left: dx, behavior: 'smooth' }); }
 
     return (
-        <section className="bg-background/50 border border-border rounded-xl p-5 shadow-xl backdrop-blur-sm">
+        <section className="bg-card border border-border rounded-xl p-5">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                     <Sparkles size={16} className="text-accent" />
@@ -86,9 +91,9 @@ export default function NewAgentsStrip({ chainIds, limit = 8 }: Props) {
                                 className="w-12 h-12 rounded-full border border-border group-hover:border-primary transition-colors"
                                 onError={fallbackImg}
                             />
-                            <div className="flex flex-col min-w-0 flex-1">
+                            <div className="flex flex-col min-w-0 flex-1 gap-1.5">
                                 <span className="font-bold text-white truncate">{a.name || `Agent #${a.agentId}`}</span>
-                                <span className="text-xs text-muted">chain {a.chainId}</span>
+                                <ChainBadge chainId={a.chainId} chain={chainMap.get(a.chainId)} size="md" className="w-fit" />
                             </div>
                         </div>
                         <div className="flex items-center justify-between">

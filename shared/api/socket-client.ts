@@ -3,6 +3,15 @@
 // Designed to be owned by a single React provider (SocketProvider); do not instantiate
 // multiple clients for the same URL in the same tab.
 
+import { env } from '@/shared/config/env';
+import {
+    DEFAULT_API_BASE_URL,
+    DEFAULT_WS_URL,
+    SOCKET_PING_INTERVAL_MS,
+    SOCKET_RECONNECT_INITIAL_DELAY_MS,
+    SOCKET_RECONNECT_MAX_DELAY_MS,
+} from '@/shared/constants/app';
+
 export interface SocketClientOptions {
     url: string;
     // initial reconnect delay in ms; doubles up to maxReconnectDelayMs on consecutive failures.
@@ -36,9 +45,9 @@ export class SocketClient {
 
     constructor(opts: SocketClientOptions) {
         this.url = opts.url;
-        this.initialDelay = opts.initialReconnectDelayMs ?? 1000;
-        this.maxDelay = opts.maxReconnectDelayMs ?? 15000;
-        this.pingIntervalMs = opts.pingIntervalMs ?? 25000;
+        this.initialDelay = opts.initialReconnectDelayMs ?? SOCKET_RECONNECT_INITIAL_DELAY_MS;
+        this.maxDelay = opts.maxReconnectDelayMs ?? SOCKET_RECONNECT_MAX_DELAY_MS;
+        this.pingIntervalMs = opts.pingIntervalMs ?? SOCKET_PING_INTERVAL_MS;
         this.onStateChange = opts.onStateChange;
     }
 
@@ -87,7 +96,7 @@ export class SocketClient {
             let payload: any;
             try { payload = JSON.parse(typeof ev.data === 'string' ? ev.data : ''); }
             catch { return; }
-            // Swallow protocol-level pong so subscribers don't see noise.
+            // Guard against any future server-sent {"type":"pong"} frames.
             if (payload?.type === 'pong') return;
             this.listeners.forEach((l) => {
                 try { l(payload); } catch { /* listener error — isolate */ }
@@ -140,10 +149,10 @@ export class SocketClient {
 // buildDefaultWsUrl converts the configured HTTP API base into a WebSocket URL.
 // Falls back to window.location when env var is missing (common in self-hosted setups).
 export function buildDefaultWsUrl(): string {
-    const fromEnv = process.env.NEXT_PUBLIC_WS_URL;
+    const fromEnv = env.wsUrlOverride;
     if (fromEnv && fromEnv.length > 0) return fromEnv;
 
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+    const apiBase = env.apiBaseUrl || DEFAULT_API_BASE_URL;
     try {
         const u = new URL(apiBase);
         u.protocol = u.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -151,6 +160,6 @@ export function buildDefaultWsUrl(): string {
         u.pathname = u.pathname.replace(/\/$/, '') + '/ws';
         return u.toString();
     } catch {
-        return 'ws://localhost:8080/api/v1/ws';
+        return DEFAULT_WS_URL;
     }
 }

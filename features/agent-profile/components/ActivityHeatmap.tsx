@@ -6,12 +6,12 @@ import { HeatmapDay } from '@/shared/api/client';
 interface Props { data: HeatmapDay[]; }
 
 function getColor(count: number, max: number): string {
-  if (!count || max === 0) return 'rgba(45,63,85,0.4)';
+  if (!count || max === 0) return '#1c1c1f';
   const pct = count / max;
   if (pct < 0.25) return 'rgba(245,158,11,0.25)';
   if (pct < 0.5)  return 'rgba(245,158,11,0.5)';
   if (pct < 0.75) return 'rgba(245,158,11,0.75)';
-  return 'rgba(245,158,11,1)';
+  return '#F59E0B';
 }
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];

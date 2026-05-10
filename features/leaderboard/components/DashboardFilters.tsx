@@ -6,8 +6,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { SlidersHorizontal, X } from 'lucide-react';
-import { api, Chain, OASFFacet, OASFFacetTree } from '@/shared/api/client';
+import { api, Chain } from '@/shared/api/client';
 import { MultiSelect, MultiSelectOption } from '@/shared/ui/MultiSelect';
+import { OASFDetailSelect } from '@/shared/ui/OASFDetailSelect';
+import { oasfSchema, flattenFacetCounts, OASFEntry } from '@/shared/api/oasf-schema';
 import { Button } from '@/shared/ui/Button';
 
 export interface DashboardFilterValue {
@@ -34,36 +36,53 @@ const SERVICE_OPTIONS: MultiSelectOption[] = [
     { value: 'web', label: 'Web' },
 ];
 
-// Flatten a flat list of OASFFacetNode into MultiSelectOption[].
-// BE already separates skillNodes / domainNodes, so no prefix-filtering needed.
-function nodesToOptions(nodes: OASFFacet[] | undefined): MultiSelectOption[] {
-    if (!nodes || !Array.isArray(nodes)) return [];
-    const walk = (n: OASFFacet): MultiSelectOption[] => [
-        {
-            value: n.key,
-            label: n.name || n.label || n.key.split('/').pop() || n.key,
-            hint: n.count,
-        },
-        ...(n.children ?? []).flatMap(walk),
-    ];
-    return nodes.flatMap(walk);
-}
-
 export default function DashboardFilters({ chains, value, onChange }: Props) {
-    const [facets, setFacets] = useState<OASFFacetTree | null>(null);
+    // Full taxonomy from the public OASF schema API — chain-independent.
+    const [skillEntries, setSkillEntries] = useState<OASFEntry[]>([]);
+    const [domainEntries, setDomainEntries] = useState<OASFEntry[]>([]);
+    const [schemaLoading, setSchemaLoading] = useState(true);
+
+    // Per-key agent counts derived from the BE `/oasf/facets` endpoint. Keyed
+    // by the full hierarchical OASF name so they line up with schema entries.
+    const [skillCounts, setSkillCounts] = useState<Record<string, number>>({});
+    const [domainCounts, setDomainCounts] = useState<Record<string, number>>({});
+
     const [tagOptions, setTagOptions] = useState<MultiSelectOption[]>([]);
 
     // Stable string key to avoid re-firing effects on every parent re-render
     // (value.chainIds is a new array reference each render even if content is same).
     const chainKey = value.chainIds.join(',');
 
-    // Load OASF facets — use first selected chain or fallback to 0 (API tolerates it).
-    // Intentionally omit `chains` from deps: we only need the first chainId (via chainKey).
-    // Including the `chains` array prop would re-fire whenever the parent re-renders.
+    // Load schema once per session. Cached in oasfSchema so re-mounts are free.
     useEffect(() => {
-        const cid = value.chainIds[0] ?? chains[0]?.chainId ?? 0;
-        if (!cid) return;
-        api.oasfFacets(cid).then((r) => { if (r.success) setFacets(r.data ?? null); });
+        let cancelled = false;
+        setSchemaLoading(true);
+        Promise.all([oasfSchema.skills(), oasfSchema.domains()])
+            .then(([skills, domains]) => {
+                if (cancelled) return;
+                setSkillEntries(skills);
+                setDomainEntries(domains);
+            })
+            .catch((err) => {
+                console.error('oasf schema fetch failed', err);
+            })
+            .finally(() => { if (!cancelled) setSchemaLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
+
+    // Load BE facet counts for the current chain scope. Passing 0 is valid
+    // on the BE and returns counts aggregated across all chains. We no longer
+    // depend on `chains` being loaded first — the bug that held this effect
+    // back until the user selected a chain.
+    useEffect(() => {
+        const cid = value.chainIds[0] ?? 0;
+        let cancelled = false;
+        api.oasfFacets(cid).then((r) => {
+            if (cancelled || !r.success || !r.data) return;
+            setSkillCounts(flattenFacetCounts(r.data.skillNodes));
+            setDomainCounts(flattenFacetCounts(r.data.domainNodes));
+        });
+        return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chainKey]);
 
@@ -79,8 +98,6 @@ export default function DashboardFilters({ chains, value, onChange }: Props) {
         () => chains.map((c) => ({ value: String(c.chainId), label: c.name, hint: c.agentCount })),
         [chains],
     );
-    const skillOptions = useMemo(() => nodesToOptions(facets?.skillNodes), [facets]);
-    const domainOptions = useMemo(() => nodesToOptions(facets?.domainNodes), [facets]);
 
     const activeCount =
         value.chainIds.length + value.services.length + value.oasfSkills.length +
@@ -101,7 +118,7 @@ export default function DashboardFilters({ chains, value, onChange }: Props) {
     }, [chainKey]);
 
     return (
-        <section className="bg-background/50 border border-border rounded-xl p-5 shadow-xl backdrop-blur-sm">
+        <section className="bg-card border border-border rounded-xl p-5">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                     <SlidersHorizontal size={16} className="text-primary" />
@@ -132,17 +149,21 @@ export default function DashboardFilters({ chains, value, onChange }: Props) {
                     selected={value.services}
                     onChange={(next) => onChange({ ...value, services: next })}
                 />
-                <MultiSelect
+                <OASFDetailSelect
                     label="OASF Skills"
                     placeholder="Any skill"
-                    options={skillOptions}
+                    entries={skillEntries}
+                    counts={skillCounts}
+                    loading={schemaLoading}
                     selected={value.oasfSkills}
                     onChange={(next) => onChange({ ...value, oasfSkills: next })}
                 />
-                <MultiSelect
+                <OASFDetailSelect
                     label="OASF Domains"
                     placeholder="Any domain"
-                    options={domainOptions}
+                    entries={domainEntries}
+                    counts={domainCounts}
+                    loading={schemaLoading}
                     selected={value.oasfDomains}
                     onChange={(next) => onChange({ ...value, oasfDomains: next })}
                 />

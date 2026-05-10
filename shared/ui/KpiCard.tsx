@@ -36,9 +36,8 @@ export default function KpiCard({ label, value, sub, icon, color = 'primary' }: 
   const display = isNum ? counted : value;
 
   return (
-    <div className={`card overflow-hidden relative flex items-center pr-4 pl-5 py-5 gap-4 group ${color === 'primary' ? 'hover:border-primary/50' : color === 'success' ? 'hover:border-success/50' : color === 'accent' ? 'hover:border-accent/50' : ''}`}>
-      <div className={`absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-10 group-hover:opacity-20 transition-opacity blur-2xl ${color === 'primary' ? 'bg-primary' : color === 'success' ? 'bg-success' : color === 'accent' ? 'bg-accent' : 'bg-danger'}`}></div>
-      <div className={`flex items-center justify-center min-w-[48px] w-12 h-12 rounded-xl border border-border shadow-inner bg-black/40 ${color === 'primary' ? 'text-primary border-primary/20' : color === 'success' ? 'text-success border-success/20' : color === 'accent' ? 'text-accent border-accent/20' : 'text-danger border-danger/20'}`}>
+    <div className={`card overflow-hidden flex items-center pr-4 pl-5 py-5 gap-4 hover:border-border/80 transition-colors`}>
+      <div className={`flex items-center justify-center min-w-[48px] w-12 h-12 rounded-xl border bg-black/40 ${color === 'primary' ? 'text-primary border-primary/20' : color === 'success' ? 'text-success border-success/20' : color === 'accent' ? 'text-accent border-accent/20' : 'text-danger border-danger/20'}`}>
         {icon}
       </div>
       <div className="flex flex-col min-w-0 pr-2">

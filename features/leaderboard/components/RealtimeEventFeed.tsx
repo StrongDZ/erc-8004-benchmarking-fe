@@ -1,13 +1,17 @@
 'use client';
 // features/leaderboard/components/RealtimeEventFeed.tsx
-// Live ticker of decoded on-chain events streamed from /api/v1/ws. Drops oldest
-// entries past the cap; each row links to the tx explorer and the agent profile.
+// Live ticker of decoded on-chain events streamed from /api/v1/ws. Keeps only the
+// newest few rows (default 4); older entries are dropped. Each row links to the
+// tx explorer and the agent profile.
 
 import Link from 'next/link';
+import { useMemo } from 'react';
 import { Activity, ExternalLink, Radio } from 'lucide-react';
 import { useSocket } from '@/providers/SocketProvider';
+import { useChain } from '@/providers/ChainProvider';
 import { useRealtimeEvents, RealtimeEvent } from '@/shared/hooks/useRealtimeEvents';
-import { explorerUrl, truncateAddress } from '@/shared/api/client';
+import { Chain, explorerUrl, truncateAddress } from '@/shared/api/client';
+import { ChainBadge } from '@/shared/ui/ChainBadge';
 
 interface Props {
     max?: number;
@@ -20,18 +24,18 @@ const iconByContract: Record<string, { dot: string; label: string }> = {
     validation: { dot: 'bg-success', label: 'Validation' },
 };
 
-function EventRow({ ev }: { ev: RealtimeEvent }) {
+function EventRow({ ev, chain }: { ev: RealtimeEvent; chain?: Chain | null }) {
     const meta = iconByContract[ev.contractType ?? ''] ?? { dot: 'bg-muted', label: ev.contractType ?? 'event' };
     return (
         <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 border border-transparent hover:border-border transition-colors group">
-            <span className={`w-2 h-2 rounded-full ${meta.dot} shadow-[0_0_8px_currentColor] flex-shrink-0`} />
+            <span className={`w-2 h-2 rounded-full ${meta.dot} flex-shrink-0`} />
             <div className="flex flex-col flex-1 min-w-0">
-                <div className="flex items-center gap-2 text-sm">
+                <div className="flex items-center gap-2 text-sm flex-wrap">
                     <span className="font-semibold text-white truncate">{ev.eventName}</span>
                     <span className="text-xs text-muted bg-black/40 px-1.5 py-0.5 rounded">{meta.label}</span>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-muted mt-0.5">
-                    <span className="tabular-nums">chain {ev.chainId}</span>
+                <div className="flex items-center gap-3 text-xs text-muted mt-0.5 flex-wrap">
+                    <ChainBadge chainId={ev.chainId} chain={chain} size="sm" className="shrink-0" />
                     {ev.agentId && (
                         <Link href={`/agents/${ev.chainId}/${ev.agentId}`} className="text-primary hover:underline">
                             agent {ev.agentId}
@@ -51,8 +55,10 @@ function EventRow({ ev }: { ev: RealtimeEvent }) {
     );
 }
 
-export default function RealtimeEventFeed({ max = 25 }: Props) {
+export default function RealtimeEventFeed({ max = 4 }: Props) {
     const { state } = useSocket();
+    const { chains } = useChain();
+    const chainMap = useMemo(() => new Map(chains.map((c) => [c.chainId, c])), [chains]);
     const { events } = useRealtimeEvents(max);
 
     const stateLabel =
@@ -64,7 +70,7 @@ export default function RealtimeEventFeed({ max = 25 }: Props) {
         state === 'connecting' || state === 'reconnecting' ? 'text-accent' : 'text-muted';
 
     return (
-        <div className="bg-background/50 border border-border rounded-xl p-5 shadow-xl backdrop-blur-sm h-full flex flex-col min-h-[340px]">
+        <div className="bg-card border border-border rounded-xl p-5 h-full flex flex-col min-h-[340px]">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
                 <div className="flex items-center gap-2">
                     <Radio size={16} className="text-primary" />
@@ -84,7 +90,11 @@ export default function RealtimeEventFeed({ max = 25 }: Props) {
                     </div>
                 ) : (
                     events.map((ev) => (
-                        <EventRow key={`${ev.chainId}:${ev.txHash}:${ev.logIndex ?? 0}`} ev={ev} />
+                        <EventRow
+                            key={`${ev.chainId}:${ev.txHash}:${ev.logIndex ?? 0}`}
+                            ev={ev}
+                            chain={chainMap.get(ev.chainId)}
+                        />
                     ))
                 )}
             </div>
