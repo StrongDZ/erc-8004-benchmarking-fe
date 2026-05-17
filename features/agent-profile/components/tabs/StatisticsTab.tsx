@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { api, AgentProfile, HeatmapDay, ScorePoint, formatPercent } from '@/shared/api/client';
 import TrustScoreChart from '@/features/agent-profile/components/TrustScoreChart';
 import ActivityHeatmap from '@/features/agent-profile/components/ActivityHeatmap';
+import { ScoreBreakdownPanel } from '@/features/agent-profile/components/ScoreBreakdownPanel';
 import { Skeleton } from '@/shared/ui/Skeleton';
 
 interface Props { chainId: number; agentId: string; }
@@ -86,6 +87,14 @@ export default function StatisticsTab({ chainId, agentId }: Props) {
 
             {/* Activity heatmap */}
             <ActivityHeatmap data={heatmap} />
+
+            {/* Score composition breakdown */}
+            {s && (
+                <ScoreBreakdownPanel
+                    breakdown={s.scoreBreakdown}
+                    compositeScore={s.trustScore}
+                />
+            )}
         </div>
     );
 }

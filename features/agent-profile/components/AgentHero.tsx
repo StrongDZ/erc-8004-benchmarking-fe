@@ -1,10 +1,9 @@
 'use client';
 import Link from 'next/link';
-import { AgentProfile, resolveIPFS, truncateAddress } from '@/shared/api/client';
+import { AgentProfile, resolveIPFS, formatScore, truncateAddress } from '@/shared/api/client';
 import { CheckCircle, XCircle, Shield, Zap } from 'lucide-react';
 import { LinkOutbound } from '@/shared/ui/LinkOutbound';
 import { Badge } from '@/shared/ui/Badge';
-import { ScoreBreakdownPanel } from './ScoreBreakdownPanel';
 
 interface Props { profile: AgentProfile; chainId: number; }
 
@@ -78,12 +77,21 @@ export default function AgentHero({ profile, chainId: _chainId }: Props) {
         </div>
       </div>
 
-      {/* Right: Trust score + breakdown receipt */}
-      <ScoreBreakdownPanel
-        breakdown={s.scoreBreakdown}
-        compositeScore={s.trustScore}
-        variant="hero"
-      />
+      {/* Right: Scoring stats */}
+      <div className="flex flex-col gap-4">
+        <div className="card-glass p-4 flex flex-col items-start">
+          <span className="text-5xl font-heading font-bold text-primary leading-none">
+            {formatScore(s.trustScore)}
+          </span>
+          <span className="text-xs uppercase tracking-wider text-muted mt-2">
+            TrustScore <span className="text-subtle">/100</span>
+          </span>
+          <div className="score-bar-wrap w-full mt-3">
+            <div className="score-bar-fill gold" style={{ width: `${Math.min(100, s.trustScore)}%` }} />
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }
