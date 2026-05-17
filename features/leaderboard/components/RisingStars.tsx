@@ -192,6 +192,7 @@ export default function RisingStars({ chainIds }: Props) {
                                             <span className="font-semibold tabular-nums text-white">
                                                 {star.scoreNow.toFixed(1)}
                                             </span>
+                                            <span className="text-[10px] text-subtle ml-0.5">/100</span>
                                         </div>
                                         <div className="flex items-center gap-1 text-xs font-semibold text-success">
                                             <TrendingUp size={14} className="shrink-0" />

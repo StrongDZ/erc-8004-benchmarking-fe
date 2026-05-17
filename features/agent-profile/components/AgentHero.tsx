@@ -9,7 +9,7 @@ interface Props { profile: AgentProfile; chainId: number; }
 
 export default function AgentHero({ profile, chainId: _chainId }: Props) {
   const s = profile.scoring;
-  const scoreRing = (s.trustScore / 1000) * 360;
+  const scoreRing = (Math.min(100, s.trustScore) / 100) * 360;
 
   return (
     <div className="card grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8 p-6 md:p-8">
@@ -83,9 +83,11 @@ export default function AgentHero({ profile, chainId: _chainId }: Props) {
           <span className="text-5xl font-heading font-bold text-primary leading-none">
             {formatScore(s.trustScore)}
           </span>
-          <span className="text-xs uppercase tracking-wider text-muted mt-2">TrustScore</span>
+          <span className="text-xs uppercase tracking-wider text-muted mt-2">
+            TrustScore <span className="text-subtle">/100</span>
+          </span>
           <div className="score-bar-wrap w-full mt-3">
-            <div className="score-bar-fill gold" style={{ width: `${(s.trustScore / 1000) * 100}%` }} />
+            <div className="score-bar-fill gold" style={{ width: `${Math.min(100, s.trustScore)}%` }} />
           </div>
         </div>
 

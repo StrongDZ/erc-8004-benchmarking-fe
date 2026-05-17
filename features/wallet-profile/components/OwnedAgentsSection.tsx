@@ -117,7 +117,9 @@ export default function OwnedAgentsSection({ agents, chains = [], loading, walle
                                                 </div>
                                             </td>
                                             <td className="max-w-0 px-4 py-2.5 text-right align-middle tabular-nums">
-                                                <span className="font-bold text-primary">{a.trustScore.toFixed(1)}</span>
+                                                <span className="font-bold text-primary">
+                                                    {a.trustScore.toFixed(1)}<span className="text-[10px] font-normal text-muted ml-0.5">/100</span>
+                                                </span>
                                             </td>
                                             <td className="max-w-0 px-4 py-2.5 text-right align-middle tabular-nums text-white">
                                                 {a.totalTasks.toLocaleString()}
