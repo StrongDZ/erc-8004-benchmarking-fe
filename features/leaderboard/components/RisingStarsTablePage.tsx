@@ -193,7 +193,7 @@ export default function RisingStarsTablePage() {
                                             />
                                         </td>
                                         <td className="px-4 py-3 text-right font-semibold tabular-nums text-white">
-                                            {star.scoreNow.toFixed(2)}
+                                            {star.scoreNow.toFixed(1)}<span className="text-[10px] font-normal text-muted ml-0.5">/100</span>
                                         </td>
                                         <td className="px-4 py-3 text-right">
                                             <span className="inline-flex items-center justify-end gap-1 font-semibold tabular-nums text-success">

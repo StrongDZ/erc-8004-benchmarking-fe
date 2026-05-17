@@ -134,7 +134,7 @@ export default function Navbar() {
                                     <div className="flex flex-col flex-1 overflow-hidden">
                                         <span className="text-white text-sm font-medium truncate">{r.name}</span>
                                         <span className="text-primary text-xs font-bold leading-none mt-1">
-                                            Trust Score: {r.trustScore.toFixed(1)}
+                                            Trust Score: {r.trustScore.toFixed(1)}/100
                                         </span>
                                     </div>
                                 </button>

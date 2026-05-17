@@ -1,5 +1,12 @@
 import type { FeedbackClassification } from '@/shared/lib/feedbackClassification';
 
+export interface ScoreBreakdown {
+    reputation: number;  // [0, 100]
+    services: number;    // [0, 100]
+    publisher: number;   // [0, 100]
+    compliance: number;  // [0, 100]
+}
+
 export interface ApiResponse<T> {
     success: boolean;
     data: T;
@@ -41,7 +48,9 @@ export interface LeaderboardAgent {
     name: string;
     image: string;
     owner: string;
+    /** Composite trust score in range [0, 100]. */
     trustScore: number;
+    scoreBreakdown: ScoreBreakdown;
     accumulatedScore: number;
     scoreUpdateAt: number;
     consecutiveFails: number;
@@ -106,7 +115,9 @@ export interface AgentProfile {
     oasfSkills: string[];
     oasfDomains: string[];
     scoring: {
+        /** Composite trust score in range [0, 100]. */
         trustScore: number;
+        scoreBreakdown: ScoreBreakdown;
         accumulatedScore: number;
         scoreUpdateAt: number;
         consecutiveFails: number;
