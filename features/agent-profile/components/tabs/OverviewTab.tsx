@@ -6,12 +6,12 @@ import {
     AgentOverview,
     ServiceOverview,
     truncateAddress,
-    explorerAddressUrl,
     explorerUrl,
 } from '@/shared/api/client';
 import { Badge } from '@/shared/ui/Badge';
+import { LinkOutbound } from '@/shared/ui/LinkOutbound';
 import { Skeleton } from '@/shared/ui/Skeleton';
-import { ExternalLink, CheckCircle, XCircle, CircleHelp, Globe } from 'lucide-react';
+import { CheckCircle, XCircle, CircleHelp, Globe } from 'lucide-react';
 
 interface Props { chainId: number; agentId: string; }
 
@@ -31,7 +31,7 @@ function HealthPill({ service }: { service: ServiceOverview }) {
     };
     const cfg = map[service.health] ?? map.unknown;
     return (
-        <Badge variant={cfg.variant} title={service.healthInfo || cfg.label}>
+        <Badge variant={cfg.variant} size="sm" title={service.healthInfo || cfg.label}>
             <cfg.Icon size={10} /> {cfg.label}
         </Badge>
     );
@@ -322,18 +322,18 @@ export default function OverviewTab({ chainId, agentId }: Props) {
                                 <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-2 flex-wrap mb-1.5">
                                         <span className="text-white font-medium text-sm">{svc.name || 'Unnamed service'}</span>
-                                        {svc.version && <Badge variant="muted" style={{ fontSize: '0.65rem' }}>v{svc.version}</Badge>}
+                                        {svc.version && <Badge variant="muted" size="xs">v{svc.version}</Badge>}
                                         <HealthPill service={svc} />
                                     </div>
                                     {svc.endpoint ? (
-                                        <a
-                                            href={svc.endpoint}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="inline-flex items-center gap-1.5 text-xs text-accent hover:text-primary transition-colors font-mono break-all"
+                                        <LinkOutbound
+                                            href={/^https?:\/\//i.test(svc.endpoint.trim()) ? svc.endpoint.trim() : `https://${svc.endpoint.trim()}`}
+                                            external
+                                            className="inline-flex items-center gap-1.5 text-xs text-accent hover:text-primary transition-colors font-mono break-all min-w-0"
                                         >
-                                            <Globe size={12} /> {svc.endpoint}
-                                        </a>
+                                            <Globe size={12} className="shrink-0" />
+                                            <span className="break-all">{svc.endpoint}</span>
+                                        </LinkOutbound>
                                     ) : (
                                         <span className="text-xs text-subtle">No endpoint declared</span>
                                     )}
@@ -356,49 +356,37 @@ export default function OverviewTab({ chainId, agentId }: Props) {
                     </InfoRow>
                     {data.owner && (
                         <InfoRow label="Owner" copyValue={data.owner}>
-                            <span className="inline-flex items-center gap-2 min-w-0 max-w-full">
-                                <Link
-                                    href={`/wallet/${data.owner}`}
-                                    className="font-mono text-xs truncate text-muted hover:text-primary transition-colors"
-                                    title={data.owner}
-                                >
-                                    {truncateAddress(data.owner, 10)}
-                                </Link>
-                                <Link
-                                    href={explorerAddressUrl(data.chainId, data.owner)}
-                                    target="_blank"
-                                    className="text-muted hover:text-primary shrink-0"
-                                >
-                                    <ExternalLink size={12} />
-                                </Link>
-                            </span>
+                            <Link
+                                href={`/wallet/${data.owner}`}
+                                className="font-mono text-xs truncate text-muted hover:text-primary transition-colors min-w-0 max-w-full inline-block"
+                                title={data.owner}
+                            >
+                                {truncateAddress(data.owner, 10)}
+                            </Link>
                         </InfoRow>
                     )}
                     {data.agentWallet && (
                         <InfoRow label="Agent Wallet" copyValue={data.agentWallet}>
-                            <span className="inline-flex items-center gap-2 min-w-0 max-w-full">
-                                <span className="font-mono text-xs truncate" title={data.agentWallet}>{truncateAddress(data.agentWallet, 10)}</span>
-                                <Link
-                                    href={explorerAddressUrl(data.chainId, data.agentWallet)}
-                                    target="_blank"
-                                    className="text-muted hover:text-primary shrink-0"
-                                >
-                                    <ExternalLink size={12} />
-                                </Link>
-                            </span>
+                            <Link
+                                href={`/wallet/${data.agentWallet}`}
+                                className="font-mono text-xs truncate text-muted hover:text-primary transition-colors min-w-0 max-w-full inline-block"
+                                title={data.agentWallet}
+                            >
+                                {truncateAddress(data.agentWallet, 10)}
+                            </Link>
                         </InfoRow>
                     )}
                     {data.createdTx && (
                         <InfoRow label="Created Tx" copyValue={data.createdTx}>
                             <span className="inline-flex items-center gap-2 min-w-0 max-w-full">
-                                <span className="font-mono text-xs truncate" title={data.createdTx}>{truncateAddress(data.createdTx, 10)}</span>
-                                <Link
+                                <LinkOutbound
                                     href={explorerUrl(data.chainId, data.createdTx)}
-                                    target="_blank"
-                                    className="text-muted hover:text-primary shrink-0"
+                                    external
+                                    className="font-mono text-xs truncate text-muted hover:text-primary transition-colors min-w-0"
+                                    title={data.createdTx}
                                 >
-                                    <ExternalLink size={12} />
-                                </Link>
+                                    {truncateAddress(data.createdTx, 10)}
+                                </LinkOutbound>
                             </span>
                         </InfoRow>
                     )}

@@ -19,7 +19,7 @@ export function buildPaginationItems(totalPages: number, current: number): Array
     add(current);
     add(totalPages - 1);
     add(totalPages);
-    const sorted = [...set].sort((a, b) => a - b);
+    const sorted = Array.from(set).sort((a, b) => a - b);
     const out: Array<number | "ellipsis"> = [];
     for (let i = 0; i < sorted.length; i++) {
         if (i > 0 && sorted[i]! - sorted[i - 1]! > 1) {

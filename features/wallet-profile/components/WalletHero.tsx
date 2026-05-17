@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Wallet, Copy, Check, ExternalLink } from 'lucide-react';
 import { explorerAddressUrl, truncateAddress } from '@/shared/api/client';
 import { Badge } from '@/shared/ui/Badge';
+import { LinkOutbound } from '@/shared/ui/LinkOutbound';
 
 interface Props {
     address: string;
@@ -38,9 +39,9 @@ export default function WalletHero({ address, chainId = 1, ownedCount, ownedLoad
                         <span className="text-xs uppercase tracking-wider text-subtle font-semibold block mb-1.5">
                             Wallet Address
                         </span>
-                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <div className="flex items-center gap-2 flex-wrap mb-1 min-w-0">
                             <span
-                                className="font-mono text-lg font-bold text-white"
+                                className="font-mono text-lg font-bold text-white truncate min-w-0"
                                 title={address}
                             >
                                 {truncateAddress(address, 12)}
@@ -55,15 +56,14 @@ export default function WalletHero({ address, chainId = 1, ownedCount, ownedLoad
                                     ? <Check size={14} className="text-emerald-400" />
                                     : <Copy size={14} />}
                             </button>
-                            <a
+                            <LinkOutbound
                                 href={explorerAddressUrl(chainId, address)}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="shrink-0 text-subtle hover:text-primary transition-colors"
+                                external
+                                className="shrink-0 inline-flex items-center rounded-md border border-border bg-white/5 p-1.5 text-subtle hover:text-primary hover:bg-white/10"
                                 title="View on block explorer"
                             >
-                                <ExternalLink size={14} />
-                            </a>
+                                <ExternalLink size={14} aria-hidden />
+                            </LinkOutbound>
                         </div>
                         <p className="text-[11px] text-subtle font-mono break-all">{address}</p>
                     </div>
@@ -73,7 +73,7 @@ export default function WalletHero({ address, chainId = 1, ownedCount, ownedLoad
                 <div className="card-glass p-4 flex flex-col items-start min-w-[180px] shrink-0">
                     <div className="flex items-center gap-2 mb-2">
                         <span className="text-xs uppercase tracking-wider text-subtle">Reputation</span>
-                        <Badge variant="muted" style={{ fontSize: '0.6rem', padding: '1px 5px' }}>
+                        <Badge variant="muted" size="xs">
                             Coming soon
                         </Badge>
                     </div>

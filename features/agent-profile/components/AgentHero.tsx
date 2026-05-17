@@ -1,12 +1,13 @@
 'use client';
 import Link from 'next/link';
-import { AgentProfile, resolveIPFS, explorerAddressUrl, formatScore, truncateAddress } from '@/shared/api/client';
-import { ExternalLink, CheckCircle, XCircle, Shield, Zap, Globe } from 'lucide-react';
+import { AgentProfile, resolveIPFS, formatScore, truncateAddress } from '@/shared/api/client';
+import { CheckCircle, XCircle, Shield, Zap } from 'lucide-react';
+import { LinkOutbound } from '@/shared/ui/LinkOutbound';
 import { Badge } from '@/shared/ui/Badge';
 
 interface Props { profile: AgentProfile; chainId: number; }
 
-export default function AgentHero({ profile, chainId }: Props) {
+export default function AgentHero({ profile, chainId: _chainId }: Props) {
   const s = profile.scoring;
   const scoreRing = (s.trustScore / 1000) * 360;
 
@@ -37,45 +38,41 @@ export default function AgentHero({ profile, chainId }: Props) {
           </h1>
           <div className="flex flex-wrap gap-2">
             {profile.active
-              ? <Badge variant="success"><CheckCircle size={10} /> Active</Badge>
-              : <Badge variant="danger"><XCircle size={10} /> Inactive</Badge>}
-            {profile.hasOASF && <Badge variant="primary">OASF</Badge>}
-            {profile.x402Support && <Badge variant="accent"><Zap size={10} /> x402</Badge>}
-            {profile.supportedTrust?.map(t => <Badge key={t} variant="muted">{t}</Badge>)}
+              ? <Badge variant="success" size="sm"><CheckCircle size={10} /> Active</Badge>
+              : <Badge variant="danger" size="sm"><XCircle size={10} /> Inactive</Badge>}
+            {profile.hasOASF && <Badge variant="primary" size="sm">OASF</Badge>}
+            {profile.x402Support && <Badge variant="accent" size="sm"><Zap size={10} /> x402</Badge>}
+            {profile.supportedTrust?.map(t => <Badge key={t} variant="muted" size="sm">{t}</Badge>)}
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted">
-            <Shield size={13} color="var(--color-text-subtle)" />
+          <div className="flex items-center gap-2 text-sm text-muted min-w-0">
+            <Shield size={13} color="var(--color-text-subtle)" className="shrink-0" />
             <Link
               href={`/wallet/${profile.owner}`}
-              className="font-mono text-xs text-muted hover:text-primary transition-colors"
+              className="inline-flex min-w-0 max-w-full items-center gap-1 font-mono text-xs text-muted hover:text-primary transition-colors truncate"
               title={profile.owner}
             >
               {truncateAddress(profile.owner, 10)}
             </Link>
-            <a href={explorerAddressUrl(chainId, profile.owner)} target="_blank" rel="noreferrer" className="text-muted hover:text-primary transition-colors">
-              <ExternalLink size={12} />
-            </a>
           </div>
           {profile.description && (
             <p className="text-muted text-sm leading-relaxed">{profile.description}</p>
           )}
 
           <div className="flex flex-wrap gap-2">
-            {profile.domains?.map(d => <Badge key={d} variant="accent">{d}</Badge>)}
+            {profile.domains?.map(d => <Badge key={d} variant="accent" size="sm">{d}</Badge>)}
             {profile.oasfSkills?.slice(0, 3).map(sk => (
-              <Badge key={sk} variant="muted" style={{ fontSize: '0.65rem' }}>{sk.split('/').pop()}</Badge>
+              <Badge key={sk} variant="muted" size="xs">{sk.split('/').pop()}</Badge>
             ))}
           </div>
 
           {profile.offchainMetadata?.website && (
-            <a
+            <LinkOutbound
               href={profile.offchainMetadata.website}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm text-accent hover:text-primary transition-colors"
+              external
+              className="inline-flex items-center gap-1.5 text-sm text-accent hover:text-primary transition-colors break-all"
             >
-              <Globe size={13} /> {profile.offchainMetadata.website}
-            </a>
+              {profile.offchainMetadata.website}
+            </LinkOutbound>
           )}
         </div>
       </div>

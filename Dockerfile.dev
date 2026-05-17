@@ -1,0 +1,18 @@
+# syntax=docker/dockerfile:1
+# Dev image — Next.js with hot reload. Source is bind-mounted at runtime
+# (see docker-compose.yaml), so edits on the host trigger rebuilds inside.
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+RUN apk add --no-cache libc6-compat
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]

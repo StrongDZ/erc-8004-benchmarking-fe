@@ -151,7 +151,7 @@ export default function HomePage() {
                             <option value="recent">Newest</option>
                         </select>
                         <span className="text-sm text-muted font-medium">{loading ? "Loading…" : `${total.toLocaleString()} agents`}</span>
-                        {activeFilterCount > 0 && <Badge variant="accent">Filtered</Badge>}
+                        {activeFilterCount > 0 && <Badge variant="accent" size="sm">Filtered</Badge>}
                     </div>
                 </div>
 

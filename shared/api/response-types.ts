@@ -1,9 +1,24 @@
+import type { FeedbackClassification } from '@/shared/lib/feedbackClassification';
+
 export interface ApiResponse<T> {
     success: boolean;
     data: T;
     meta?: { page: number; limit: number; total: number };
     error?: { code: string; message: string };
     requestId?: string;
+}
+
+/** GET /offchain-by-uri — Mongo `offchain_data` row for a logical URI. */
+export interface OffchainByUriData {
+    found: boolean;
+    status?: number;
+    sourceType?: string;
+    eventType?: string;
+    contractType?: string;
+    fetchError?: string;
+    contentSize?: number;
+    parsed?: unknown;
+    rawPreview?: string;
 }
 
 export interface ChainCore {
@@ -67,6 +82,7 @@ export interface RisingStar {
     chainId: number;
     agentId: string;
     name: string;
+    image?: string;
     scoreNow: number;
     scoreBefore: number;
     delta: number;
@@ -178,14 +194,13 @@ export interface Feedback {
     txHash: string;
     blockNumber: number;
     timestamp: string;
+    /** Unix seconds when the feedback event occurred (preferred for sorting/math). */
+    timestampUnix?: number;
     revokeTxHash: string | null;
     feedbackURI?: string;
-    classification?: {
-        category: string;
-        confidence: number;
-        source: string;
-        normalizedTag: string;
-    };
+    /** Scale detected by the backend for this (tag1, tag2) pair: binary | star5 | star10 | pct100 | unbounded | "" */
+    valueScale?: string;
+    classification?: FeedbackClassification;
     responses?: Array<{ responder: string; responseURI: string; txHash: string }>;
 }
 
@@ -285,3 +300,5 @@ export interface WalletFeedback extends Feedback {
     chainId: number;
     agentName?: string;
 }
+
+export type { FeedbackClassification } from '@/shared/lib/feedbackClassification';

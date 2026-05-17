@@ -21,6 +21,7 @@ const config: Config = {
                 success: "var(--color-success)",
                 danger: "var(--color-danger)",
                 warning: "var(--color-warning)",
+                warningDim: "var(--color-warning-dim)",
                 border: "var(--color-border)",
             },
             fontFamily: {

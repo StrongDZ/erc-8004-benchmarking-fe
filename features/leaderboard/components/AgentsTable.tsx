@@ -5,8 +5,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AgentService, Chain, LeaderboardAgent, explorerAddressUrl, resolveIPFS, truncateAddress } from "@/shared/api/client";
-import { ExternalLink } from "lucide-react";
+import { AgentService, Chain, LeaderboardAgent, resolveIPFS, truncateAddress } from "@/shared/api/client";
 import { FALLBACK_AVATAR_DATA_URI } from "@/shared/constants/app";
 import { Badge } from "@/shared/ui/Badge";
 import { ChainBadge } from "@/shared/ui/ChainBadge";
@@ -43,12 +42,9 @@ function serviceCell(services?: AgentService[]) {
     return (
         <div className="flex min-w-0 flex-nowrap items-center gap-1 overflow-hidden" title={full}>
             {services.slice(0, 3).map((s) => (
-                <span
-                    key={s.name}
-                    className="inline-flex max-w-[5.5rem] shrink-0 items-center truncate rounded border border-primary/30 bg-primary/15 px-1 py-0 text-[10px] font-semibold uppercase leading-none tracking-wide text-primary shadow-sm ring-1 ring-primary/10"
-                >
+                <Badge key={s.name} variant="primary" size="xxs" className="max-w-[5.5rem] truncate shrink-0">
                     {s.name}
-                </span>
+                </Badge>
             ))}
             {services.length > 3 && <span className="shrink-0 text-[10px] font-medium text-muted">+{services.length - 3}</span>}
         </div>
@@ -76,7 +72,7 @@ function AgentsTableThead() {
 function AgentsTableShell({ children }: { children: ReactNode }) {
     return (
         <div className="w-full overflow-x-auto rounded-lg border border-border bg-black/20">
-            <table className="w-full table-fixed text-left text-sm">
+            <table className="data-table w-full table-fixed text-left text-sm">
                 <AgentsTableThead />
                 {children}
             </table>
@@ -187,20 +183,10 @@ export default function AgentsTable({ agents, chains = [], loading, pageSize = D
                                             </span>
                                             <span className="flex shrink-0 items-center gap-0.5">
                                                 {a.hasOASF && (
-                                                    <Badge
-                                                        variant="success"
-                                                        className="!h-4 !min-h-0 !px-1 !py-0 !text-[9px] !leading-none !tracking-wide"
-                                                    >
-                                                        OASF
-                                                    </Badge>
+                                                    <Badge variant="success" size="xxs">OASF</Badge>
                                                 )}
                                                 {a.x402Support && (
-                                                    <Badge
-                                                        variant="primary"
-                                                        className="!h-4 !min-h-0 !px-1 !py-0 !text-[9px] !leading-none !tracking-wide"
-                                                    >
-                                                        x402
-                                                    </Badge>
+                                                    <Badge variant="primary" size="xxs">x402</Badge>
                                                 )}
                                             </span>
                                         </div>
@@ -222,28 +208,16 @@ export default function AgentsTable({ agents, chains = [], loading, pageSize = D
                             <td className="max-w-0 px-4 py-2.5 text-right align-middle whitespace-nowrap tabular-nums text-white">
                                 {a.totalTasks.toLocaleString()}
                             </td>
-                            <td className="max-w-0 px-4 py-2.5 align-middle">
+                            <td className="max-w-0 min-w-0 px-4 py-2.5 align-middle">
                                 {a.owner ? (
-                                    <div className="flex items-center gap-1.5 min-w-0">
-                                        <Link
-                                            href={`/wallet/${a.owner}`}
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="truncate font-mono text-xs text-muted hover:text-primary transition-colors"
-                                            title={a.owner}
-                                        >
-                                            {truncateAddress(a.owner)}
-                                        </Link>
-                                        <a
-                                            href={explorerAddressUrl(a.chainId, a.owner)}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="shrink-0 text-subtle hover:text-muted transition-colors"
-                                            title="View on explorer"
-                                        >
-                                            <ExternalLink size={10} />
-                                        </a>
-                                    </div>
+                                    <Link
+                                        href={`/wallet/${a.owner}`}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="inline-flex w-full min-w-0 truncate font-mono text-xs text-muted hover:text-primary transition-colors"
+                                        title={a.owner}
+                                    >
+                                        {truncateAddress(a.owner)}
+                                    </Link>
                                 ) : (
                                     <span className="text-muted text-xs">—</span>
                                 )}

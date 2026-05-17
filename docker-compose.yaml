@@ -1,0 +1,24 @@
+services:
+    frontend-dev:
+        build:
+            context: .
+            dockerfile: Dockerfile.dev
+        container_name: erc8004-frontend-dev
+        ports:
+            - "3000:3000"
+        env_file:
+            - .env.local
+        environment:
+            # Forces webpack/chokidar to poll the filesystem instead of using inotify.
+            # Required for hot reload through macOS/Windows bind mounts.
+            - WATCHPACK_POLLING=true
+            - CHOKIDAR_USEPOLLING=true
+            - NEXT_TELEMETRY_DISABLED=1
+        volumes:
+            # Mount source so saves on the host trigger Next.js rebuilds.
+            - .:/app
+            # Anonymous volumes keep container-installed dirs from being shadowed
+            # by the host bind mount above.
+            - /app/node_modules
+            - /app/.next
+        restart: unless-stopped

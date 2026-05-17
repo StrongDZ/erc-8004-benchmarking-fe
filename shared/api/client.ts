@@ -3,6 +3,7 @@ import { agentsApi } from '@/shared/api/modules/agents';
 import { chainsApi } from '@/shared/api/modules/chains';
 import { leaderboardApi } from '@/shared/api/modules/leaderboard';
 import { oasfApi } from '@/shared/api/modules/oasf';
+import { offchainApi } from '@/shared/api/modules/offchain';
 import { walletApi } from '@/shared/api/modules/wallet';
 import {
     explorerAddressUrl as toExplorerAddressUrl,
@@ -27,6 +28,7 @@ export const api = {
     ...leaderboardApi,
     ...agentsApi,
     ...oasfApi,
+    ...offchainApi,
     ...adminApi,
     ...walletApi,
 };

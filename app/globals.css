@@ -21,11 +21,13 @@
   --color-accent-dim: rgba(139, 92, 246, 0.15);
   --color-accent-glow: rgba(139, 92, 246, 0.4);
 
-  --color-success: #10B981;
-  --color-success-dim: rgba(16, 185, 129, 0.15);
-  --color-danger: #EF4444;
-  --color-danger-dim: rgba(239, 68, 68, 0.15);
-  --color-warning: #F59E0B;
+  --color-success: #34D399;
+  --color-success-dim: rgba(52, 211, 153, 0.18);
+  --color-danger: #F87171;
+  --color-danger-dim: rgba(248, 113, 113, 0.18);
+  /* Mid-band VI (distinct from primary orange CTAs) */
+  --color-warning: #FBBF24;
+  --color-warning-dim: rgba(251, 191, 36, 0.2);
 
   --color-text: #F8FAFC;
   --color-text-muted: #94A3B8;
@@ -134,11 +136,13 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   text-transform: uppercase;
 }
 
-.badge-primary { background: var(--color-primary-dim); color: var(--color-primary); border: 1px solid rgba(245, 158, 11, 0.3); }
-.badge-accent { background: var(--color-accent-dim); color: var(--color-accent); border: 1px solid rgba(139, 92, 246, 0.3); }
-.badge-success { background: var(--color-success-dim); color: var(--color-success); border: 1px solid rgba(16, 185, 129, 0.3); }
-.badge-danger { background: var(--color-danger-dim); color: var(--color-danger); border: 1px solid rgba(239, 68, 68, 0.3); }
-.badge-muted { background: rgba(100, 116, 139, 0.15); color: var(--color-text-muted); border: 1px solid rgba(100, 116, 139, 0.2); }
+.badge-default { background: rgba(255, 255, 255, 0.08); color: var(--color-text); border: 1px solid rgba(255, 255, 255, 0.18); }
+.badge-primary { background: var(--color-primary-dim); color: var(--color-primary); border: 1px solid rgba(245, 158, 11, 0.42); }
+.badge-accent { background: var(--color-accent-dim); color: var(--color-accent); border: 1px solid rgba(139, 92, 246, 0.42); }
+.badge-success { background: var(--color-success-dim); color: var(--color-success); border: 1px solid rgba(52, 211, 153, 0.42); }
+.badge-danger { background: var(--color-danger-dim); color: var(--color-danger); border: 1px solid rgba(248, 113, 113, 0.45); }
+.badge-muted { background: rgba(148, 163, 184, 0.12); color: #CBD5E1; border: 1px solid rgba(148, 163, 184, 0.35); }
+.badge-warning { background: var(--color-warning-dim); color: var(--color-warning); border: 1px solid rgba(251, 191, 36, 0.45); }
 
 /* === Buttons === */
 .btn {
@@ -192,7 +196,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .score-bar-fill.purple { background: var(--color-accent); }
 
 /* === Table === */
-.data-table { width: 100%; border-collapse: collapse; }
+.data-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .data-table th {
   text-align: left;
   padding: 12px 16px;
@@ -210,6 +214,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   font-size: 0.9rem;
   border-bottom: 1px solid var(--color-border-subtle);
   vertical-align: middle;
+  overflow: hidden;
 }
 .data-table tbody tr { transition: var(--transition); }
 .data-table tbody tr:hover { background: var(--color-bg-card-hover); cursor: pointer; }

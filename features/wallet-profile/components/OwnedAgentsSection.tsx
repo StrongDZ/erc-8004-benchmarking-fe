@@ -66,7 +66,7 @@ export default function OwnedAgentsSection({ agents, chains = [], loading, walle
             ) : (
                 <>
                     <div className="w-full overflow-x-auto rounded-lg border border-border bg-black/20">
-                        <table className="w-full table-fixed text-left text-sm">
+                        <table className="data-table w-full table-fixed text-left text-sm">
                             <thead className="bg-black/40 text-muted uppercase text-xs sticky top-0 font-semibold tracking-wider">
                                 <tr>
                                     <th className="w-[42%] px-4 py-2.5 font-medium border-b border-white/5">Agent</th>
@@ -123,10 +123,7 @@ export default function OwnedAgentsSection({ agents, chains = [], loading, walle
                                                 {a.totalTasks.toLocaleString()}
                                             </td>
                                             <td className="max-w-0 px-4 py-2.5 text-center align-middle">
-                                                <Badge
-                                                    variant={a.active ? 'success' : 'danger'}
-                                                    className="!text-[10px] !px-1.5"
-                                                >
+                                                <Badge variant={a.active ? 'success' : 'danger'} size="xs">
                                                     {a.active ? 'Active' : 'Inactive'}
                                                 </Badge>
                                             </td>
