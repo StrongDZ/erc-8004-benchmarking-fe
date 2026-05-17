@@ -51,7 +51,7 @@ export interface LeaderboardAgent {
     /** Composite trust score in range [0, 100]. */
     trustScore: number;
     scoreBreakdown: ScoreBreakdown;
-    accumulatedScore: number;
+    reputationScore: number;
     scoreUpdateAt: number;
     consecutiveFails: number;
     totalTasks: number;
@@ -118,7 +118,7 @@ export interface AgentProfile {
         /** Composite trust score in range [0, 100]. */
         trustScore: number;
         scoreBreakdown: ScoreBreakdown;
-        accumulatedScore: number;
+        reputationScore: number;
         scoreUpdateAt: number;
         consecutiveFails: number;
         penalty: number;
