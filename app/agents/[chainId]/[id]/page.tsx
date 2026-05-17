@@ -6,7 +6,6 @@ import { Button } from '@/shared/ui/Button';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { api, AgentProfile } from '@/shared/api/client';
 import AgentHero from '@/features/agent-profile/components/AgentHero';
-import { ScoreBreakdownPanel } from '@/features/agent-profile/components/ScoreBreakdownPanel';
 import OverviewTab from '@/features/agent-profile/components/tabs/OverviewTab';
 import StatisticsTab from '@/features/agent-profile/components/tabs/StatisticsTab';
 import FeedbackTab from '@/features/agent-profile/components/tabs/FeedbackTab';
@@ -97,17 +96,7 @@ export default function AgentProfilePage({ params }: { params: { chainId: string
             </div>
 
             {/* Tab content — each tab owns its own data fetching */}
-            {tab === 'overview' && (
-                <div className="flex flex-col gap-6">
-                    {profile.scoring.scoreBreakdown && (
-                        <ScoreBreakdownPanel
-                            breakdown={profile.scoring.scoreBreakdown}
-                            compositeScore={profile.scoring.trustScore}
-                        />
-                    )}
-                    <OverviewTab chainId={chainId} agentId={agentId} />
-                </div>
-            )}
+            {tab === 'overview' && <OverviewTab chainId={chainId} agentId={agentId} />}
             {tab === 'statistics' && <StatisticsTab chainId={chainId} agentId={agentId} />}
             {tab === 'feedback' && <FeedbackTab chainId={chainId} agentId={agentId} />}
         </div>
