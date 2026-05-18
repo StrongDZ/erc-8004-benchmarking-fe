@@ -1,7 +1,7 @@
 import type { FeedbackClassification } from '@/shared/lib/feedbackClassification';
 
 export interface ScoreBreakdown {
-    reputation: number;  // [0, 100]
+    reputation: number;  // raw accumulator (unbounded); UI clamps to [0,100] for composite contribution
     services: number;    // [0, 100]
     publisher: number;   // [0, 100]
     compliance: number;  // [0, 100]
@@ -166,7 +166,7 @@ export interface AgentOverview {
     offchainMetadata?: Record<string, unknown>;
 }
 
-export interface ScorePoint {
+export interface ReputationScorePoint {
     timestamp: string;
     score: number;
     type: 'event' | 'decay';

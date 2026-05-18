@@ -9,7 +9,7 @@ import type {
     Penalty,
     ProofData,
     RadarData,
-    ScorePoint,
+    ReputationScorePoint,
 } from '@/shared/api/types';
 
 export const agentsApi = {
@@ -19,8 +19,8 @@ export const agentsApi = {
     agentOverview: (chainId: number, agentId: string) =>
         apiFetch<AgentOverview>(`/agents/${chainId}/${agentId}/overview`),
 
-    scoreHistory: (chainId: number, agentId: string, resolution = '1d') =>
-        apiFetch<{ points: ScorePoint[] }>(`/agents/${chainId}/${agentId}/score-history?resolution=${resolution}`),
+    reputationScoreHistory: (chainId: number, agentId: string) =>
+        apiFetch<{ points: ReputationScorePoint[] }>(`/agents/${chainId}/${agentId}/reputation-score-history`),
 
     radar: (chainId: number, agentId: string) =>
         apiFetch<RadarData>(`/agents/${chainId}/${agentId}/radar`),
