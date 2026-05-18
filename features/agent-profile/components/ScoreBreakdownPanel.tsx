@@ -74,8 +74,11 @@ const EMPTY: ScoreBreakdown = { reputation: 0, services: 0, publisher: 0, compli
 export function ScoreBreakdownPanel({ breakdown, compositeScore, variant = 'standalone' }: ScoreBreakdownPanelProps) {
     const data = breakdown ?? EMPTY;
     const isPending = !breakdown;
+    // Reputation is the RAW accumulator (unbounded). Other components are already [0,100].
+    // To match BE composite math, reputation contributes via normalization: clamp(raw, 0, 100).
+    const reputationNorm = Math.max(0, Math.min(100, data.reputation));
     const sumContrib =
-        data.reputation * 0.5 + data.services * 0.2 + data.publisher * 0.2 + data.compliance * 0.1;
+        reputationNorm * 0.5 + data.services * 0.2 + data.publisher * 0.2 + data.compliance * 0.1;
     const isHero = variant === 'hero';
 
     return (
@@ -128,8 +131,10 @@ export function ScoreBreakdownPanel({ breakdown, compositeScore, variant = 'stan
                 <div className="flex flex-col gap-3">
                     {COMPONENTS.map(c => {
                         const raw = data[c.key];
+                        // For composite math, every component is clamped to [0,100] before weighting.
+                        // For Reputation specifically, raw is unbounded (can exceed 100); contribution still uses the clamped value.
                         const clamped = Math.max(0, Math.min(100, raw));
-                        const contribution = raw * c.weight;
+                        const contribution = clamped * c.weight;
                         return (
                             <div key={c.key}>
                                 <div className="flex items-center justify-between text-xs mb-1.5">
