@@ -11,7 +11,7 @@ import {
 import { Badge } from '@/shared/ui/Badge';
 import { LinkOutbound } from '@/shared/ui/LinkOutbound';
 import { Skeleton } from '@/shared/ui/Skeleton';
-import { CheckCircle, XCircle, CircleHelp, Globe } from 'lucide-react';
+import { CheckCircle, XCircle, CircleHelp, Globe, AlertTriangle } from 'lucide-react';
 
 interface Props { chainId: number; agentId: string; }
 
@@ -26,12 +26,16 @@ function servicePriority(name: string | undefined): number {
 function HealthPill({ service }: { service: ServiceOverview }) {
     const map = {
         ok: { label: 'Healthy', variant: 'success' as const, Icon: CheckCircle },
+        warning: { label: 'Non-JSON', variant: 'warning' as const, Icon: AlertTriangle },
         fail: { label: 'Unreachable', variant: 'danger' as const, Icon: XCircle },
         unknown: { label: 'Unknown', variant: 'muted' as const, Icon: CircleHelp },
     };
     const cfg = map[service.health] ?? map.unknown;
+    const title = service.healthInfo
+        ? `${cfg.label} — ${service.healthInfo}`
+        : cfg.label;
     return (
-        <Badge variant={cfg.variant} size="sm" title={service.healthInfo || cfg.label}>
+        <Badge variant={cfg.variant} size="sm" title={title}>
             <cfg.Icon size={10} /> {cfg.label}
         </Badge>
     );

@@ -145,7 +145,7 @@ export interface ServiceOverview {
     version?: string;
     skills?: string[];
     domains?: string[];
-    health: 'ok' | 'fail' | 'unknown';
+    health: 'ok' | 'warning' | 'fail' | 'unknown';
     healthInfo?: string;
 }
 
