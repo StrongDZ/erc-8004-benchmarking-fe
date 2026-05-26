@@ -34,14 +34,15 @@ function axisFormatter(view: View) {
 export default function TrustScoreChart({ points }: Props) {
   const [view, setView] = useState<View>('day');
 
+  const filtered = useMemo(() => filterPoints(points, view), [points, view]);
+
   const option = useMemo(() => {
-    const filtered = filterPoints(points, view);
     const [yMin, yMax] = niceYDomain(filtered);
     const now = Date.now();
     const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
 
     const dataZoomBase = {
-      fillerColor: 'rgba(139,92,246,0.15)',
+      fillerColor: 'rgba(139,92,246,0.15)', // EC.accent (#8B5CF6) at 15% opacity
       borderColor: 'transparent',
       handleStyle: { color: EC.accent },
       textStyle: { color: EC.axis },
@@ -123,7 +124,7 @@ export default function TrustScoreChart({ points }: Props) {
         emphasis: { scale: 1.5 },
       }],
     };
-  }, [points, view]);
+  }, [filtered, view]);
 
   return (
     <div className="card p-5">
@@ -144,6 +145,8 @@ export default function TrustScoreChart({ points }: Props) {
 
       {!points.length ? (
         <div className="py-16 text-center text-muted text-sm">No trust score history available</div>
+      ) : !filtered.length ? (
+        <div className="py-16 text-center text-muted text-sm">No data points in this view</div>
       ) : (
         <ReactECharts option={option} style={{ height: 300 }} />
       )}
