@@ -1,92 +1,134 @@
 'use client';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import ReactECharts from 'echarts-for-react';
 import { useMemo, useState } from 'react';
-import { format, startOfWeek } from 'date-fns';
-import type { ReputationScorePoint } from '@/shared/api/client';
+import type { TrustScorePoint } from '@/shared/api/client';
+import { EC } from '@/features/agent-profile/lib/echarts-theme';
 
 type View = 'day' | 'month' | 'year';
+interface Props { points: TrustScorePoint[]; }
 
-interface Props { points: ReputationScorePoint[]; }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (!active || !payload?.length) return null;
-  const d = payload[0];
-  const isDecay = d.payload.type === 'decay';
-  return (
-    <div className="bg-card border border-border rounded-md px-3 py-2 text-xs shadow-lg">
-      <div className="text-muted mb-1">{label}</div>
-      <div
-        className="font-medium"
-        style={{ color: isDecay ? 'var(--color-primary)' : 'var(--color-accent)' }}
-      >
-        {isDecay ? '⬇ Decay' : '⬆ Event'}: <strong>{Number(d.value).toFixed(2)}</strong>
-      </div>
-    </div>
-  );
-};
-
-// bucketDecays preserves every "event" point and collapses "decay" points into one per
-// bucket (last decay per bucket). Buckets:
-//   day   — no bucketing
-//   month — ISO week (Mon)
-//   year  — calendar month (UTC)
-function bucketDecays(points: ReputationScorePoint[], view: View): ReputationScorePoint[] {
+function filterPoints(points: TrustScorePoint[], view: View): TrustScorePoint[] {
   if (view === 'day') return points;
-  const bucketKey = (iso: string) => {
-    const d = new Date(iso);
-    if (view === 'month') {
-      const monday = startOfWeek(d, { weekStartsOn: 1 });
-      return `w-${monday.toISOString().slice(0, 10)}`;
-    }
-    return `m-${d.getUTCFullYear()}-${d.getUTCMonth()}`;
+  if (view === 'month') return points.filter(p => new Date(p.timestamp).getUTCDay() === 1);
+  return points.filter(p => new Date(p.timestamp).getUTCDate() === 1);
+}
+
+function niceYDomain(points: TrustScorePoint[]): [number, number] {
+  if (!points.length) return [0, 100];
+  const scores = points.map(p => p.score);
+  const rawMin = Math.min(...scores);
+  const rawMax = Math.max(...scores);
+  const lo = Math.floor(rawMin / 10) * 10;
+  const hi = Math.ceil(rawMax / 10) * 10;
+  return lo === hi ? [Math.max(0, lo - 10), Math.min(100, hi + 10)] : [lo, hi];
+}
+
+function axisFormatter(view: View) {
+  return (value: number) => {
+    const d = new Date(value);
+    if (view === 'year') return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
-  const lastDecayByBucket = new Map<string, ReputationScorePoint>();
-  const events: ReputationScorePoint[] = [];
-  for (const p of points) {
-    if (p.type === 'event') {
-      events.push(p);
-      continue;
-    }
-    lastDecayByBucket.set(bucketKey(p.timestamp), p);
-  }
-  const merged = [...events, ...Array.from(lastDecayByBucket.values())];
-  merged.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-  return merged;
 }
 
-function formatLabel(iso: string, view: View): string {
-  const d = new Date(iso);
-  if (view === 'year') return format(d, 'MMM yyyy');
-  return format(d, 'MMM d');
-}
-
-export default function ReputationScoreChart({ points }: Props) {
+export default function TrustScoreChart({ points }: Props) {
   const [view, setView] = useState<View>('day');
 
-  const data = useMemo(() => {
-    const bucketed = bucketDecays(points, view);
-    return bucketed.map(p => ({
-      ...p,
-      date: formatLabel(p.timestamp, view),
-      displayScore: Number(p.score.toFixed(2)),
-    }));
-  }, [points, view]);
+  const option = useMemo(() => {
+    const filtered = filterPoints(points, view);
+    const [yMin, yMax] = niceYDomain(filtered);
+    const now = Date.now();
+    const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
 
-  const domain = useMemo<[number, number] | undefined>(() => {
-    if (!data.length) return undefined;
-    const raw = data.map(d => d.displayScore);
-    const min = Math.min(...raw);
-    const max = Math.max(...raw);
-    const range = max - min || 1;
-    const pad = range * 0.1;
-    return [Math.floor(min - pad), Math.ceil(max + pad)];
-  }, [data]);
+    const dataZoomBase = {
+      fillerColor: 'rgba(139,92,246,0.15)',
+      borderColor: 'transparent',
+      handleStyle: { color: EC.accent },
+      textStyle: { color: EC.axis },
+      dataBackground: { lineStyle: { color: EC.accent, opacity: 0.3 }, areaStyle: { opacity: 0 } },
+    };
+
+    return {
+      backgroundColor: 'transparent',
+      animation: true,
+      grid: { left: 50, right: 20, top: 10, bottom: 60, containLabel: false },
+      xAxis: {
+        type: 'time',
+        axisLabel: { color: EC.axis, fontSize: 11, formatter: axisFormatter(view) },
+        axisLine: { show: false },
+        axisTick: { show: false },
+        splitLine: { show: false },
+      },
+      yAxis: {
+        type: 'value',
+        min: yMin,
+        max: yMax,
+        axisLabel: {
+          color: EC.axis,
+          fontSize: 11,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          formatter: (v: any) => Number(v).toFixed(0),
+        },
+        axisLine: { show: false },
+        axisTick: { show: false },
+        splitLine: { lineStyle: { color: EC.grid } },
+      },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: EC.tooltipBg,
+        borderColor: EC.tooltipBorder,
+        borderWidth: 1,
+        textStyle: { color: '#E2E8F0', fontSize: 11 },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        formatter: (params: any) => {
+          const p = Array.isArray(params) ? params[0] : params;
+          if (!p) return '';
+          const point = filtered[p.dataIndex as number];
+          const isDecay = point?.type === 'decay';
+          const date = new Date(p.value[0] as number).toLocaleDateString('en-US', {
+            month: 'short', day: 'numeric', year: 'numeric',
+          });
+          const score = Number(p.value[1]).toFixed(2);
+          const hashLine = point?.txHash
+            ? `<div style="color:${EC.axis};font-size:10px;margin-top:2px">${point.txHash.slice(0, 14)}…</div>`
+            : '';
+          return `<div style="color:#94A3B8;margin-bottom:4px">${date}</div>
+            <div style="color:${isDecay ? EC.primary : EC.accent};font-weight:700">
+              ${isDecay ? '⬇ Decay' : '⬆ Event'}: ${score}
+            </div>${hashLine}`;
+        },
+      },
+      dataZoom: [
+        {
+          type: 'slider',
+          bottom: 8,
+          height: 20,
+          ...(view === 'day'
+            ? { startValue: thirtyDaysAgo, endValue: now }
+            : { start: 0, end: 100 }),
+          ...dataZoomBase,
+        },
+        { type: 'inside' },
+      ],
+      series: [{
+        type: 'line',
+        data: filtered.map(p => ({
+          value: [new Date(p.timestamp).getTime(), p.score],
+          itemStyle: { color: p.type === 'event' ? EC.accent : EC.primary },
+          symbolSize: p.type === 'event' ? 8 : 6,
+        })),
+        lineStyle: { color: EC.accent, width: 2.5 },
+        symbol: 'circle',
+        smooth: false,
+        emphasis: { scale: 1.5 },
+      }],
+    };
+  }, [points, view]);
 
   return (
     <div className="card p-5">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-heading text-lg text-white">Reputation Score History</h3>
+        <h3 className="font-heading text-lg text-white">Trust Score History</h3>
         <div className="tabs">
           {(['day', 'month', 'year'] as View[]).map(v => (
             <button
@@ -100,46 +142,19 @@ export default function ReputationScoreChart({ points }: Props) {
         </div>
       </div>
 
-      {!data.length ? (
-        <div className="py-16 text-center text-muted text-sm">No reputation history available</div>
+      {!points.length ? (
+        <div className="py-16 text-center text-muted text-sm">No trust score history available</div>
       ) : (
-        <ResponsiveContainer width="100%" height={260}>
-          <LineChart data={data} margin={{ top: 10, right: 16, bottom: 0, left: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-            <XAxis dataKey="date" tick={{ fill: 'var(--color-text-subtle)', fontSize: 11 }} tickLine={false} axisLine={false} />
-            <YAxis
-              domain={domain}
-              allowDecimals={false}
-              tickFormatter={(v) => Number(v).toFixed(0)}
-              tick={{ fill: 'var(--color-text-subtle)', fontSize: 11 }}
-              tickLine={false}
-              axisLine={false}
-              width={45}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Line
-              type="monotone"
-              dataKey="displayScore"
-              stroke="var(--color-accent)"
-              strokeWidth={2.5}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              dot={(p: any) => {
-                const isDecay = p.payload.type === 'decay';
-                return <circle key={p.key} cx={p.cx} cy={p.cy} r={isDecay ? 3 : 4} fill={isDecay ? 'var(--color-primary)' : 'var(--color-accent)'} stroke="none" />;
-              }}
-              activeDot={{ r: 6, fill: 'var(--color-accent)', stroke: 'var(--color-bg-card)', strokeWidth: 2 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <ReactECharts option={option} style={{ height: 300 }} />
       )}
 
-      <div className="flex items-center gap-4 mt-3 text-xs text-muted">
+      <div className="flex items-center gap-4 mt-1 text-xs text-muted">
         <div className="flex items-center gap-1.5">
-          <span className="inline-block w-2.5 h-2.5 rounded-full bg-accent" />
+          <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: EC.accent }} />
           Event
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="inline-block w-2.5 h-2.5 rounded-full bg-primary" />
+          <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: EC.primary }} />
           Decay
         </div>
       </div>
