@@ -1,6 +1,7 @@
 'use client';
-import { RadarChart as RChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer, Tooltip } from 'recharts';
-import { RadarData } from '@/shared/api/client';
+import ReactECharts from 'echarts-for-react';
+import type { RadarData } from '@/shared/api/client';
+import { EC } from '@/features/agent-profile/lib/echarts-theme';
 
 interface Props { data: RadarData | null; }
 
@@ -11,7 +12,7 @@ const AXES = [
   { key: 'scoreVelocity', label: 'Velocity' },
   { key: 'domainDepth',   label: 'Domain Depth' },
   { key: 'consistency',   label: 'Consistency' },
-];
+] as const;
 
 export default function AgentRadarChart({ data }: Props) {
   if (!data) {
@@ -22,46 +23,58 @@ export default function AgentRadarChart({ data }: Props) {
     );
   }
 
-  const chartData = AXES.map(a => ({
-    axis: a.label,
-    value: Math.round((data[a.key as keyof RadarData] ?? 0) * 100),
-  }));
+  const values = AXES.map(a => Math.round((data[a.key as keyof RadarData] ?? 0) * 100));
+
+  const option = {
+    backgroundColor: 'transparent',
+    radar: {
+      indicator: AXES.map(a => ({ name: a.label, max: 100 })),
+      splitNumber: 4,
+      center: ['50%', '50%'],
+      radius: '65%',
+      axisName: { color: '#94A3B8', fontSize: 11 },
+      splitLine: { lineStyle: { color: 'rgba(45,63,85,0.7)' } },
+      splitArea: { show: false },
+      axisLine: { lineStyle: { color: 'rgba(45,63,85,0.7)' } },
+    },
+    tooltip: {
+      backgroundColor: EC.tooltipBg,
+      borderColor: EC.tooltipBorder,
+      borderWidth: 1,
+      textStyle: { color: '#E2E8F0', fontSize: 11 },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      formatter: (params: any) => {
+        const vals = params.value as number[];
+        return AXES.map((a, i) => `${a.label}: <strong>${vals[i]}%</strong>`).join('<br/>');
+      },
+    },
+    series: [{
+      type: 'radar',
+      data: [{ value: values, name: 'Agent' }],
+      lineStyle: { color: EC.accent, width: 2 },
+      itemStyle: { color: EC.accent },
+      areaStyle: {
+        color: 'rgba(139,92,246,0.25)',
+        shadowBlur: 10,
+        shadowColor: 'rgba(139,92,246,0.4)',
+      },
+      symbol: 'circle',
+      symbolSize: 5,
+    }],
+  };
 
   return (
     <div className="card p-5">
       <h3 className="font-heading text-lg text-white mb-3">Skill Radar</h3>
-      <ResponsiveContainer width="100%" height={260}>
-        <RChart data={chartData} margin={{ top: 10, right: 24, bottom: 10, left: 24 }}>
-          <PolarGrid stroke="rgba(45,63,85,0.7)" />
-          <PolarAngleAxis dataKey="axis" tick={{ fill: '#94A3B8', fontSize: 11 }} />
-          <Tooltip
-            formatter={(v: number) => [`${v}%`, 'Value']}
-            contentStyle={{ background: '#1E293B', border: '1px solid #2D3F55', borderRadius: 10, fontFamily: 'Exo 2' }}
-            labelStyle={{ color: '#F8FAFC' }}
-          />
-          <Radar
-            dataKey="value"
-            stroke="#8B5CF6"
-            fill="#8B5CF6"
-            fillOpacity={0.25}
-            strokeWidth={2}
-            dot={{ fill: '#8B5CF6', r: 4, strokeWidth: 0 }}
-          />
-        </RChart>
-      </ResponsiveContainer>
+      <ReactECharts option={option} style={{ height: 260 }} />
       <div className="flex flex-col gap-1.5 mt-3">
-        {AXES.map(a => (
+        {AXES.map((a, i) => (
           <div key={a.key} className="flex items-center gap-2 text-xs">
             <span className="w-32 text-muted">{a.label}</span>
             <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-accent"
-                style={{ width: `${(data[a.key as keyof RadarData] ?? 0) * 100}%` }}
-              />
+              <div className="h-full bg-accent" style={{ width: `${values[i]}%` }} />
             </div>
-            <span className="w-10 text-right tabular-nums text-muted">
-              {((data[a.key as keyof RadarData] ?? 0) * 100).toFixed(0)}%
-            </span>
+            <span className="w-10 text-right tabular-nums text-muted">{values[i]}%</span>
           </div>
         ))}
       </div>
