@@ -41,7 +41,7 @@ export default function ActivityHeatmap({ data }: Props) {
         top: 20,
         right: 10,
         bottom: 10,
-        itemStyle: { borderWidth: 2, borderColor: '#0F172A', borderRadius: 3 },
+        itemStyle: { borderWidth: 2, borderColor: '#0F172A', borderRadius: 3, color: '#1c1c1f' },
         splitLine: { show: false },
         dayLabel: {
           nameMap: ['', 'Mon', '', 'Wed', '', 'Fri', ''],
