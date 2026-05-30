@@ -1,22 +1,16 @@
 // shared/api/oasf-schema.ts
-// Client for the public OASF schema API (https://schema.oasf.outshift.com).
-// Uses the category endpoints (each top-level class has `depth === 0` and its
-// own caption/description, so the UI can render the taxonomy without a separate
-// group header):
-//   - /skill_categories
-//   - /domain_categories
-//
-// Returned entries are flattened while preserving tree metadata (depth/parent).
-// The hierarchical `key` matches what the BE stores on each agent (`oasfSkills`,
-// `oasfDomains`) so counts from `/oasf/facets` can be joined by key.
+// OASF taxonomy client — reads from the backend (GET /oasf/schema/skills and /domains)
+// which caches the data from schema.oasf.outshift.com and refreshes weekly.
+// Callers are unchanged: oasfSchema.skills(), oasfSchema.domains(), flattenFacetCounts().
 
-const OASF_SCHEMA_BASE = 'https://schema.oasf.outshift.com/api/1.0.0';
+import { env } from '@/shared/config/env';
+
+const API_BASE = env.apiBaseUrl;
 
 export interface OASFEntry {
     // Full hierarchical name (e.g. "natural_language_processing/ethical_interaction").
-    // This is the key that matches agent.oasfSkills / agent.oasfDomains on the BE.
+    // Matches agent.oasfSkills / agent.oasfDomains on the BE.
     key: string;
-    // Leaf name (e.g. "ethical_interaction").
     shortName: string;
     caption: string;
     description: string;
@@ -25,56 +19,13 @@ export interface OASFEntry {
     categoryName: string;
     depth: number;
     parentKey?: string;
-    extends?: string;
 }
 
-interface RawCategoryNode {
-    id?: number;
-    name?: string;
-    caption?: string;
-    description?: string;
-    classes?: Record<string, RawCategoryNode>;
-}
-
-function parseEntries(raw: Record<string, RawCategoryNode>): OASFEntry[] {
-    const out: OASFEntry[] = [];
-    function visit(
-        tree: Record<string, RawCategoryNode>,
-        depth: number,
-        categoryKey: string,
-        categoryName: string,
-        parentKey?: string,
-    ) {
-        for (const shortName of Object.keys(tree)) {
-            const r = tree[shortName];
-            if (!r || typeof r !== 'object') continue;
-            const key = r.name ?? shortName;
-            const nextCategoryKey = depth === 0 ? key : categoryKey;
-            const nextCategoryName = depth === 0 ? (r.caption ?? shortName) : categoryName;
-            out.push({
-                key,
-                shortName: key.split('/').pop() ?? shortName,
-                caption: r.caption ?? shortName,
-                description: r.description ?? '',
-                uid: typeof r.id === 'number' ? r.id : 0,
-                category: nextCategoryKey,
-                categoryName: nextCategoryName,
-                depth,
-                parentKey,
-            });
-            if (r.classes && typeof r.classes === 'object') {
-                visit(r.classes, depth + 1, nextCategoryKey, nextCategoryName, key);
-            }
-        }
-    }
-    visit(raw, 0, '', '');
-    return out;
-}
-
-async function fetchJson<T>(url: string): Promise<T> {
-    const res = await fetch(url, { headers: { accept: 'application/json' } });
-    if (!res.ok) throw new Error(`oasf schema ${url}: ${res.status}`);
-    return (await res.json()) as T;
+async function fetchSchema(path: string): Promise<OASFEntry[]> {
+    const res = await fetch(`${API_BASE}${path}`, { headers: { accept: 'application/json' } });
+    if (!res.ok) throw new Error(`oasf schema ${path}: ${res.status}`);
+    const json = await res.json() as { data?: OASFEntry[] };
+    return json.data ?? [];
 }
 
 // Small in-memory cache: the schema rarely changes and popups may open/close
@@ -85,16 +36,14 @@ let domainsCache: Promise<OASFEntry[]> | null = null;
 export const oasfSchema = {
     skills(): Promise<OASFEntry[]> {
         if (!skillsCache) {
-            skillsCache = fetchJson<Record<string, RawCategoryNode>>(`${OASF_SCHEMA_BASE}/skill_categories`)
-                .then(parseEntries)
+            skillsCache = fetchSchema('/oasf/schema/skills')
                 .catch((err) => { skillsCache = null; throw err; });
         }
         return skillsCache;
     },
     domains(): Promise<OASFEntry[]> {
         if (!domainsCache) {
-            domainsCache = fetchJson<Record<string, RawCategoryNode>>(`${OASF_SCHEMA_BASE}/domain_categories`)
-                .then(parseEntries)
+            domainsCache = fetchSchema('/oasf/schema/domains')
                 .catch((err) => { domainsCache = null; throw err; });
         }
         return domainsCache;
