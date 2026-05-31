@@ -7,3 +7,4 @@ export type { FeedbackValuePillProps } from '@/shared/ui/feedback/FeedbackValueP
 export { FeedbackMetaRow } from '@/shared/ui/feedback/FeedbackMetaRow';
 export type { FeedbackMetaRowProps, FeedbackMetaVariant } from '@/shared/ui/feedback/FeedbackMetaRow';
 export { FeedbackMetricPanel } from '@/shared/ui/feedback/FeedbackMetricPanel';
+export { FeedbackContentCell } from '@/shared/ui/feedback/FeedbackContentCell';

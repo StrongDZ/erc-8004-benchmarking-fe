@@ -14,7 +14,7 @@ function categoryVariant(cat: string): BadgeVariant {
   switch (cat) {
     case 'service_feedback': return 'accent';
     case 'config_feedback':  return 'warning';
-    case 'spam':             return 'danger';
+    case 'junk':             return 'danger';
     case 'app_specific':     return 'primary';
     default:                 return 'muted';
   }
