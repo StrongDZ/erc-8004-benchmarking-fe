@@ -1,13 +1,15 @@
 'use client';
 import Link from 'next/link';
-import { AgentProfile, resolveIPFS, formatScore, truncateAddress } from '@/shared/api/client';
+import { AgentProfile, formatScore, truncateAddress } from '@/shared/api/client';
+import { AgentAvatar } from '@/shared/ui/AgentAvatar';
 import { CheckCircle, XCircle, Shield, Zap } from 'lucide-react';
 import { LinkOutbound } from '@/shared/ui/LinkOutbound';
 import { Badge } from '@/shared/ui/Badge';
+import { RegistrationBadge } from './RegistrationBadge';
 
 interface Props { profile: AgentProfile; chainId: number; }
 
-export default function AgentHero({ profile, chainId: _chainId }: Props) {
+export default function AgentHero({ profile, chainId }: Props) {
   const s = profile.scoring;
   const scoreRing = (Math.min(100, s.trustScore) / 100) * 360;
 
@@ -16,11 +18,12 @@ export default function AgentHero({ profile, chainId: _chainId }: Props) {
       {/* Left: Avatar + info */}
       <div className="flex gap-6 items-start">
         <div className="relative w-24 h-24 shrink-0">
-          <img
-            src={resolveIPFS(profile.image)}
+          <AgentAvatar
+            image={profile.image}
+            seed={profile.agentId}
+            size={96}
             alt={profile.name}
             className="w-24 h-24 rounded-full border-2 border-border object-cover"
-            onError={e => { (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/identicon/svg?seed=${profile.agentId}`; }}
           />
           <svg className="absolute inset-0 w-24 h-24 -rotate-0 pointer-events-none" viewBox="0 0 96 96">
             <circle cx="48" cy="48" r="44" fill="none" stroke="var(--color-border)" strokeWidth="4" />
@@ -37,6 +40,7 @@ export default function AgentHero({ profile, chainId: _chainId }: Props) {
             {profile.name || `Agent #${profile.agentId}`}
           </h1>
           <div className="flex flex-wrap gap-2">
+            <RegistrationBadge currentChainId={chainId} currentAgentId={profile.agentId} />
             {profile.active
               ? <Badge variant="success" size="sm"><CheckCircle size={10} /> Active</Badge>
               : <Badge variant="danger" size="sm"><XCircle size={10} /> Inactive</Badge>}
