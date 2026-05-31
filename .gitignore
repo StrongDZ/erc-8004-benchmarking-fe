@@ -39,3 +39,8 @@ next-env.d.ts
 .next/*
 design-system/*
 .DS_Store
+
+
+#docs
+docs/*
+.*/
