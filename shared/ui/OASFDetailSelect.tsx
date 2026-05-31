@@ -79,6 +79,8 @@ export function OASFDetailSelect({ label, placeholder = "Any", entries, counts, 
             <button
                 type="button"
                 onClick={() => setOpen((v) => !v)}
+                aria-expanded={open}
+                aria-haspopup="listbox"
                 className="w-full flex items-center justify-between gap-2 bg-black/40 border border-border rounded-md px-3 py-2 hover:border-primary/60 focus:border-primary outline-none transition-colors text-left"
             >
                 <div className="flex items-center gap-1.5 flex-wrap flex-1 min-w-0">
@@ -130,6 +132,7 @@ export function OASFDetailSelect({ label, placeholder = "Any", entries, counts, 
                                 autoFocus
                                 className="bg-transparent border-none outline-none text-white w-full placeholder:text-muted/60 text-sm"
                                 placeholder="Search caption, description, or category…"
+                                aria-label="Search options"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />

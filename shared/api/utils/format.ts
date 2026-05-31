@@ -1,5 +1,10 @@
 import { FALLBACK_AVATAR_DATA_URI, IPFS_GATEWAY } from '@/shared/constants/app';
 
+export function ensureHttpsUrl(url: string): string {
+    const trimmed = url.trim();
+    return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
 export function resolveIPFS(uri: string | undefined | null): string {
     if (!uri) return FALLBACK_AVATAR_DATA_URI;
     if (uri.startsWith('ipfs://')) return IPFS_GATEWAY + uri.slice(7);

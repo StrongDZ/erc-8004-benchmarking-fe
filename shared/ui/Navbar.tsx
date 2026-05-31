@@ -5,8 +5,8 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Search, Activity, Shield, BarChart3, Zap } from "lucide-react";
 import { useChain } from "@/providers/ChainProvider";
 import { useSocket } from "@/providers/SocketProvider";
-import { api, resolveIPFS } from "@/shared/api/client";
-import { FALLBACK_AVATAR_DATA_URI } from "@/shared/constants/app";
+import { api } from "@/shared/api/client";
+import { AgentAvatar } from "@/shared/ui/AgentAvatar";
 
 interface SearchResult {
     chainId: number;
@@ -99,6 +99,7 @@ export default function Navbar() {
                         <input
                             className="bg-transparent border-none text-white outline-none w-48 focus:w-64 transition-all text-sm"
                             placeholder="Search agents…"
+                            aria-label="Search agents"
                             value={query}
                             onChange={(e) => {
                                 setQuery(e.target.value);
@@ -123,13 +124,12 @@ export default function Navbar() {
                                         setQuery("");
                                     }}
                                 >
-                                    <img
-                                        src={resolveIPFS(r.image)}
+                                    <AgentAvatar
+                                        image={r.image}
+                                        seed={r.agentId}
+                                        size={32}
                                         alt={r.name}
-                                        className="w-8 h-8 rounded-full border border-border"
-                                        onError={(e) => {
-                                            (e.target as HTMLImageElement).src = FALLBACK_AVATAR_DATA_URI;
-                                        }}
+                                        className="w-8 h-8 rounded-full border border-border object-cover"
                                     />
                                     <div className="flex flex-col flex-1 overflow-hidden">
                                         <span className="text-white text-sm font-medium truncate">{r.name}</span>

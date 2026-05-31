@@ -79,6 +79,8 @@ export function MultiSelect({
             <button
                 type="button"
                 onClick={() => setOpen((v) => !v)}
+                aria-expanded={open}
+                aria-haspopup="listbox"
                 className="w-full flex items-center justify-between gap-2 bg-black/40 border border-border rounded-md px-3 py-2 hover:border-primary/60 focus:border-primary outline-none transition-colors text-left"
             >
                 <div className="flex items-center gap-1.5 flex-wrap flex-1 min-w-0">
@@ -122,6 +124,7 @@ export function MultiSelect({
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 placeholder="Search…"
+                                aria-label="Search items"
                                 className="bg-transparent outline-none text-sm text-white w-full placeholder:text-muted/60"
                                 autoFocus
                             />

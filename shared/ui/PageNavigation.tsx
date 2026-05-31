@@ -69,7 +69,7 @@ export default function PageNavigation({ page, totalPages, onPageChange, loading
 
     return (
         <div className={rootClass}>
-            <div className="flex flex-wrap items-center gap-1 text-sm justify-center lg:justify-start">
+            <div className="flex flex-nowrap overflow-x-auto items-center gap-1 text-sm justify-start pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden w-full lg:w-auto">
                 <Button
                     type="button"
                     variant="outline"

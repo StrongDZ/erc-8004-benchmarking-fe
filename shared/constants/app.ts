@@ -9,6 +9,9 @@ export const FALLBACK_AVATAR_DATA_URI =
 
 export const INDEXER_STATUS_POLL_INTERVAL_MS = 30_000;
 
+export const DEFAULT_FEEDBACK_PAGE_SIZE = 10;
+export const RISING_STAR_PERIODS = ['24h', '7d', '30d'] as const;
+
 export const SOCKET_RECONNECT_INITIAL_DELAY_MS = 1_000;
 export const SOCKET_RECONNECT_MAX_DELAY_MS = 15_000;
 export const SOCKET_PING_INTERVAL_MS = 25_000;
