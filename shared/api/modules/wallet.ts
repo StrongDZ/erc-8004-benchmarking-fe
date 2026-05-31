@@ -1,5 +1,5 @@
 import { apiFetch } from '@/shared/api/core/http';
-import type { LeaderboardAgent, WalletFeedback } from '@/shared/api/types';
+import type { LeaderboardAgent, WalletFeedback, WalletProfile } from '@/shared/api/types';
 
 export const walletApi = {
     ownedAgents: (address: string) =>
@@ -11,4 +11,9 @@ export const walletApi = {
         apiFetch<WalletFeedback[]>(
             `/wallet/${encodeURIComponent(address)}/feedbacks?page=${page}&limit=${limit}`,
         ),
+
+    walletProfile: (address: string, chainId?: number) => {
+        const q = chainId ? `?chainId=${chainId}` : '';
+        return apiFetch<WalletProfile>(`/wallet/${encodeURIComponent(address)}${q}`);
+    },
 };

@@ -1,11 +1,12 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Chain, LeaderboardAgent, resolveIPFS } from '@/shared/api/client';
-import { FALLBACK_AVATAR_DATA_URI } from '@/shared/constants/app';
+import { Chain, LeaderboardAgent } from '@/shared/api/client';
+import { DEFAULT_FEEDBACK_PAGE_SIZE } from '@/shared/constants/app';
 import { Badge } from '@/shared/ui/Badge';
 import { ChainBadge } from '@/shared/ui/ChainBadge';
 import PageNavigation from '@/shared/ui/PageNavigation';
+import { AgentAvatar } from '@/shared/ui/AgentAvatar';
 
 interface Props {
     agents: LeaderboardAgent[];
@@ -15,11 +16,7 @@ interface Props {
     walletAddress?: string;
 }
 
-function fallbackImg(e: React.SyntheticEvent<HTMLImageElement>) {
-    (e.target as HTMLImageElement).src = FALLBACK_AVATAR_DATA_URI;
-}
-
-const PAGE_SIZE = 10;
+const PAGE_SIZE = DEFAULT_FEEDBACK_PAGE_SIZE;
 
 export default function OwnedAgentsSection({ agents, chains = [], loading, walletAddress }: Props) {
     const [page, setPage] = useState(1);
@@ -66,14 +63,21 @@ export default function OwnedAgentsSection({ agents, chains = [], loading, walle
             ) : (
                 <>
                     <div className="w-full overflow-x-auto rounded-lg border border-border bg-black/20">
-                        <table className="data-table w-full table-fixed text-left text-sm">
-                            <thead className="bg-black/40 text-muted uppercase text-xs sticky top-0 font-semibold tracking-wider">
+                        <table className="data-table w-full min-w-[700px] table-fixed text-left text-sm">
+                            <colgroup>
+                                <col style={{ width: '42%' }} />
+                                <col style={{ width: '17%' }} />
+                                <col style={{ width: '13%' }} />
+                                <col style={{ width: '13%' }} />
+                                <col style={{ width: '15%' }} />
+                            </colgroup>
+                            <thead className="bg-black/40 text-muted uppercase text-xs font-semibold tracking-wider">
                                 <tr>
-                                    <th className="w-[42%] px-4 py-2.5 font-medium border-b border-white/5">Agent</th>
-                                    <th className="w-[17%] px-4 py-2.5 font-medium border-b border-white/5">Chain</th>
-                                    <th className="w-[13%] px-4 py-2.5 font-medium border-b border-white/5 text-right">Score</th>
-                                    <th className="w-[13%] px-4 py-2.5 font-medium border-b border-white/5 text-right">Tasks</th>
-                                    <th className="w-[15%] px-4 py-2.5 font-medium border-b border-white/5 text-center">Status</th>
+                                    <th className="px-4 py-2.5 font-medium border-b border-white/5">Agent</th>
+                                    <th className="px-4 py-2.5 font-medium border-b border-white/5">Chain</th>
+                                    <th className="px-4 py-2.5 font-medium border-b border-white/5 text-right">Score</th>
+                                    <th className="px-4 py-2.5 font-medium border-b border-white/5 text-right">Tasks</th>
+                                    <th className="px-4 py-2.5 font-medium border-b border-white/5 text-center">Status</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
@@ -89,11 +93,12 @@ export default function OwnedAgentsSection({ agents, chains = [], loading, walle
                                                     href={`/agents/${a.chainId}/${a.agentId}`}
                                                     className="flex items-center gap-2 min-w-0"
                                                 >
-                                                    <img
-                                                        src={resolveIPFS(a.image)}
+                                                    <AgentAvatar
+                                                        image={a.image}
+                                                        seed={a.agentId}
+                                                        size={32}
                                                         alt=""
-                                                        className="h-8 w-8 shrink-0 rounded-full border border-border group-hover:border-primary transition-colors"
-                                                        onError={fallbackImg}
+                                                        className="h-8 w-8 shrink-0 rounded-full border border-border group-hover:border-primary transition-colors object-cover"
                                                     />
                                                     <div className="min-w-0 flex-1">
                                                         <p
@@ -106,7 +111,7 @@ export default function OwnedAgentsSection({ agents, chains = [], loading, walle
                                                     </div>
                                                 </Link>
                                             </td>
-                                            <td className="max-w-0 px-4 py-2.5 align-middle overflow-hidden">
+                                            <td className="px-4 py-2.5 align-middle">
                                                 <div className="min-w-0">
                                                     <ChainBadge
                                                         chainId={a.chainId}
@@ -116,15 +121,15 @@ export default function OwnedAgentsSection({ agents, chains = [], loading, walle
                                                     />
                                                 </div>
                                             </td>
-                                            <td className="max-w-0 px-4 py-2.5 text-right align-middle tabular-nums">
+                                            <td className="px-4 py-2.5 text-right align-middle tabular-nums">
                                                 <span className="font-bold text-primary">
                                                     {a.trustScore.toFixed(1)}<span className="text-[10px] font-normal text-muted ml-0.5">/100</span>
                                                 </span>
                                             </td>
-                                            <td className="max-w-0 px-4 py-2.5 text-right align-middle tabular-nums text-white">
+                                            <td className="px-4 py-2.5 text-right align-middle tabular-nums text-white">
                                                 {a.totalTasks.toLocaleString()}
                                             </td>
-                                            <td className="max-w-0 px-4 py-2.5 text-center align-middle">
+                                            <td className="px-4 py-2.5 text-center align-middle">
                                                 <Badge variant={a.active ? 'success' : 'danger'} size="xs">
                                                     {a.active ? 'Active' : 'Inactive'}
                                                 </Badge>

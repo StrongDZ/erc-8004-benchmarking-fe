@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { api, LeaderboardAgent } from '@/shared/api/client';
+import { api, LeaderboardAgent, WalletProfile } from '@/shared/api/client';
 import { useChain } from '@/providers/ChainProvider';
 import WalletHero from '@/features/wallet-profile/components/WalletHero';
 import OwnedAgentsSection from '@/features/wallet-profile/components/OwnedAgentsSection';
@@ -15,6 +15,7 @@ export default function WalletPage({ params }: { params: { address: string } }) 
     const [ownedAgents, setOwnedAgents] = useState<LeaderboardAgent[]>([]);
     const [ownedLoading, setOwnedLoading] = useState(true);
     const [feedbackTotal, setFeedbackTotal] = useState(0);
+    const [walletProfile, setWalletProfile] = useState<WalletProfile | null>(null);
 
     useEffect(() => {
         setOwnedLoading(true);
@@ -27,8 +28,14 @@ export default function WalletPage({ params }: { params: { address: string } }) 
             .finally(() => setOwnedLoading(false));
     }, [address]);
 
+    useEffect(() => {
+        api.walletProfile(address)
+            .then(r => { if (r.success) setWalletProfile(r.data ?? null); })
+            .catch(() => {});
+    }, [address]);
+
     // Derive chainId for block explorer link from first owned agent (fallback to mainnet)
-    const primaryChainId = ownedAgents[0]?.chainId ?? 1;
+    const primaryChainId = ownedAgents[0]?.chainId ?? walletProfile?.chainId ?? 1;
 
     return (
         <div className="container fade-in" style={{ padding: '32px 0 64px' }}>
@@ -55,6 +62,8 @@ export default function WalletPage({ params }: { params: { address: string } }) 
                     ownedLoading={ownedLoading}
                     feedbackCount={feedbackTotal}
                     interactedCount={0}
+                    trustScore={walletProfile?.trustScore}
+                    trustScorePropagated={walletProfile?.trustScorePropagated}
                 />
                 <OwnedAgentsSection
                     agents={ownedAgents}

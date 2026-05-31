@@ -1,8 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Wallet, Copy, Check, ExternalLink } from 'lucide-react';
-import { explorerAddressUrl, truncateAddress } from '@/shared/api/client';
-import { Badge } from '@/shared/ui/Badge';
+import { explorerAddressUrl, formatScore, truncateAddress } from '@/shared/api/client';
 import { LinkOutbound } from '@/shared/ui/LinkOutbound';
 
 interface Props {
@@ -12,16 +11,23 @@ interface Props {
     ownedLoading: boolean;
     feedbackCount: number;
     interactedCount: number;
+    trustScore?: number;
+    trustScorePropagated?: number;
 }
 
-export default function WalletHero({ address, chainId = 1, ownedCount, ownedLoading, feedbackCount, interactedCount }: Props) {
+export default function WalletHero({ address, chainId = 1, ownedCount, ownedLoading, feedbackCount, interactedCount, trustScore, trustScorePropagated }: Props) {
     const [copied, setCopied] = useState(false);
+
+    useEffect(() => {
+        if (!copied) return;
+        const timer = setTimeout(() => setCopied(false), 1200);
+        return () => clearTimeout(timer);
+    }, [copied]);
 
     const handleCopy = async () => {
         try {
             await navigator.clipboard.writeText(address);
             setCopied(true);
-            setTimeout(() => setCopied(false), 1200);
         } catch {
             setCopied(false);
         }
@@ -69,16 +75,24 @@ export default function WalletHero({ address, chainId = 1, ownedCount, ownedLoad
                     </div>
                 </div>
 
-                {/* Right: reputation score placeholder */}
-                <div className="card-glass p-4 flex flex-col items-start min-w-[180px] shrink-0">
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs uppercase tracking-wider text-subtle">Reputation</span>
-                        <Badge variant="muted" size="xs">
-                            Coming soon
-                        </Badge>
+                {/* Right: trust scores */}
+                <div className="card-glass p-4 flex flex-col gap-3 min-w-[200px] shrink-0">
+                    <div className="flex flex-col gap-0.5">
+                        <span className="text-xs uppercase tracking-wider text-subtle">Trust Score</span>
+                        {trustScore !== undefined
+                            ? <span className="text-3xl font-heading font-bold text-primary leading-none">{formatScore(trustScore)}</span>
+                            : <span className="text-3xl font-heading font-bold text-subtle leading-none">—</span>
+                        }
+                        <span className="text-[10px] text-subtle">write-time</span>
                     </div>
-                    <span className="text-4xl font-heading font-bold text-subtle leading-none">—</span>
-                    <span className="text-xs text-subtle mt-1">/ 1000</span>
+                    <div className="flex flex-col gap-0.5 pt-2 border-t border-white/5">
+                        <span className="text-xs uppercase tracking-wider text-subtle">Propagated</span>
+                        {trustScorePropagated !== undefined
+                            ? <span className="text-2xl font-heading font-bold text-accent leading-none">{formatScore(trustScorePropagated)}</span>
+                            : <span className="text-2xl font-heading font-bold text-subtle leading-none">—</span>
+                        }
+                        <span className="text-[10px] text-subtle">graph pass / 100</span>
+                    </div>
                 </div>
             </div>
 
