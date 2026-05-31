@@ -104,12 +104,13 @@ export default function TrustScoreChart({ points }: Props) {
           type: 'slider',
           bottom: 8,
           height: 20,
+          filterMode: 'none',
           ...(view === 'day'
             ? { startValue: thirtyDaysAgo, endValue: now }
             : { start: 0, end: 100 }),
           ...dataZoomBase,
         },
-        { type: 'inside' },
+        { type: 'inside', filterMode: 'none' },
       ],
       series: [{
         type: 'line',

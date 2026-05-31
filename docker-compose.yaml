@@ -19,6 +19,9 @@ services:
             - .:/app
             # Anonymous volumes keep container-installed dirs from being shadowed
             # by the host bind mount above.
+            #
+            # If package.json/package-lock.json change, this volume keeps OLD node_modules
+            # unless you recreate it — run: docker compose down -v && docker compose up --build
             - /app/node_modules
             - /app/.next
         restart: unless-stopped

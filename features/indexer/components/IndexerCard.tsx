@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Copy, Check, Cpu, Users, MessageSquare, Activity } from "lucide-react";
 import { Card, CardContent } from "@/shared/ui/Card";
 import { ChainBadge } from "@/shared/ui/ChainBadge";
@@ -8,12 +8,18 @@ import { truncateAddress } from "@/shared/api/client";
 
 function CopyField({ label, value }: { label: string; value?: string }) {
     const [copied, setCopied] = useState(false);
+
+    useEffect(() => {
+        if (!copied) return;
+        const timer = setTimeout(() => setCopied(false), 1500);
+        return () => clearTimeout(timer);
+    }, [copied]);
+
     if (!value) return null;
 
     function copy() {
         navigator.clipboard.writeText(value!);
         setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
     }
 
     return (

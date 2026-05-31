@@ -128,6 +128,7 @@ export default function IndexerPage() {
                 <input
                     className="bg-transparent border-none text-white outline-none text-sm w-full placeholder:text-subtle"
                     placeholder="Search by chain name or ID…"
+                    aria-label="Search by chain name or ID"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />

@@ -154,7 +154,8 @@ export function buildDefaultWsUrl(): string {
 
     const apiBase = env.apiBaseUrl || DEFAULT_API_BASE_URL;
     try {
-        const u = new URL(apiBase);
+        const base = typeof window !== 'undefined' ? window.location.origin : undefined;
+        const u = new URL(apiBase, base);
         u.protocol = u.protocol === 'https:' ? 'wss:' : 'ws:';
         // API base already ends with /api/v1 — append /ws.
         u.pathname = u.pathname.replace(/\/$/, '') + '/ws';

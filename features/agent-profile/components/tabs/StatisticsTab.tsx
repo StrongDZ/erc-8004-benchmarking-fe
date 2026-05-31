@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { api, AgentProfile, HeatmapDay, ReputationScorePoint, formatPercent } from '@/shared/api/client';
-import ReputationScoreChart from '@/features/agent-profile/components/ReputationScoreChart';
+import { api, AgentProfile, HeatmapDay, TrustScorePoint, formatPercent } from '@/shared/api/client';
+import TrustScoreChart from '@/features/agent-profile/components/TrustScoreChart';
 import ActivityHeatmap from '@/features/agent-profile/components/ActivityHeatmap';
 import { ScoreBreakdownPanel } from '@/features/agent-profile/components/ScoreBreakdownPanel';
 import { Skeleton } from '@/shared/ui/Skeleton';
@@ -10,7 +10,7 @@ interface Props { chainId: number; agentId: string; }
 
 export default function StatisticsTab({ chainId, agentId }: Props) {
     const [profile, setProfile] = useState<AgentProfile | null>(null);
-    const [reputationHistory, setReputationHistory] = useState<ReputationScorePoint[]>([]);
+    const [trustHistory, setTrustHistory] = useState<TrustScorePoint[]>([]);
     const [heatmap, setHeatmap] = useState<HeatmapDay[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -18,7 +18,7 @@ export default function StatisticsTab({ chainId, agentId }: Props) {
         setLoading(true);
         Promise.all([
             api.agentProfile(chainId, agentId).then(r => setProfile(r.data ?? null)),
-            api.reputationScoreHistory(chainId, agentId).then(r => setReputationHistory(r.data?.points ?? [])),
+            api.trustScoreHistory(chainId, agentId).then(r => setTrustHistory(r.data?.points ?? [])),
             api.activityHeatmap(chainId, agentId).then(r => setHeatmap(r.data ?? [])),
         ]).finally(() => setLoading(false));
     }, [chainId, agentId]);
@@ -83,7 +83,7 @@ export default function StatisticsTab({ chainId, agentId }: Props) {
             )}
 
             {/* TrustScore evolution */}
-            <ReputationScoreChart points={reputationHistory} />
+            <TrustScoreChart points={trustHistory} />
 
             {/* Activity heatmap */}
             <ActivityHeatmap data={heatmap} />

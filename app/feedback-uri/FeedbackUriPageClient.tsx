@@ -35,6 +35,12 @@ export function FeedbackUriPageClient() {
   const searchParams = useSearchParams();
   const [copied, setCopied] = useState(false);
   const [offchain, setOffchain] = useState<OffchainByUriData | null>(null);
+
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(timer);
+  }, [copied]);
   const [offchainLoading, setOffchainLoading] = useState(false);
   const [offchainError, setOffchainError] = useState<string | null>(null);
 
@@ -83,7 +89,6 @@ export function FeedbackUriPageClient() {
     if (!raw || !navigator.clipboard?.writeText) return;
     await navigator.clipboard.writeText(raw);
     setCopied(true);
-    window.setTimeout(() => setCopied(false), 2000);
   }
 
   if (!raw) {

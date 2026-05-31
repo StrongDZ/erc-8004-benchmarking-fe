@@ -8,6 +8,8 @@ import {
     truncateAddress,
     explorerUrl,
 } from '@/shared/api/client';
+import { ensureHttpsUrl } from '@/shared/api/utils/format';
+import { useCopyToClipboard } from '@/shared/hooks/useCopyToClipboard';
 import { Badge } from '@/shared/ui/Badge';
 import { LinkOutbound } from '@/shared/ui/LinkOutbound';
 import { Skeleton } from '@/shared/ui/Skeleton';
@@ -42,18 +44,8 @@ function HealthPill({ service }: { service: ServiceOverview }) {
 }
 
 function InfoRow({ label, children, copyValue }: { label: string; children: React.ReactNode; copyValue?: string }) {
-    const [copied, setCopied] = useState(false);
-
-    const handleCopy = async () => {
-        if (!copyValue) return;
-        try {
-            await navigator.clipboard.writeText(copyValue);
-            setCopied(true);
-            window.setTimeout(() => setCopied(false), 1200);
-        } catch {
-            setCopied(false);
-        }
-    };
+    const [copied, copy] = useCopyToClipboard();
+    const handleCopy = () => { if (copyValue) copy(copyValue); };
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-[10rem_minmax(0,1fr)_auto] gap-1 sm:gap-3 items-center py-2.5 border-b border-white/5 last:border-0">
@@ -205,17 +197,8 @@ function ExpandableValue({ value }: { value: unknown }) {
 }
 
 function MetadataRow({ label, value, rowKey }: { label: string; value: unknown; rowKey: string }) {
-    const [copied, setCopied] = useState(false);
-
-    const handleCopy = async () => {
-        try {
-            await navigator.clipboard.writeText(formatValue(value));
-            setCopied(true);
-            window.setTimeout(() => setCopied(false), 1200);
-        } catch {
-            setCopied(false);
-        }
-    };
+    const [copied, copy] = useCopyToClipboard();
+    const handleCopy = () => copy(formatValue(value));
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-[10rem_minmax(0,1fr)_auto] gap-2 sm:gap-3 items-start py-2.5 border-b border-white/5 last:border-0">
@@ -331,7 +314,7 @@ export default function OverviewTab({ chainId, agentId }: Props) {
                                     </div>
                                     {svc.endpoint ? (
                                         <LinkOutbound
-                                            href={/^https?:\/\//i.test(svc.endpoint.trim()) ? svc.endpoint.trim() : `https://${svc.endpoint.trim()}`}
+                                            href={ensureHttpsUrl(svc.endpoint)}
                                             external
                                             className="inline-flex items-center gap-1.5 text-xs text-accent hover:text-primary transition-colors font-mono break-all min-w-0"
                                         >
