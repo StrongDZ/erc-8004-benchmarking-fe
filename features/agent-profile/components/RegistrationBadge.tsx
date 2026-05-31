@@ -155,7 +155,7 @@ export function RegistrationBadge({ currentChainId, currentAgentId }: Props) {
             </button>
 
             {open && (
-                <div className="absolute top-full left-0 mt-1.5 z-50 min-w-[320px] card border border-border/60 shadow-xl p-2 flex flex-col gap-1">
+                <div className="absolute top-full left-0 mt-1.5 z-50 min-w-[420px] card border border-border/60 shadow-xl p-2 flex flex-col gap-1">
                     {regs.map(reg => (
                         <PopoverRow
                             key={`${reg.chainId}-${reg.agentId}`}
