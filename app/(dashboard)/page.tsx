@@ -122,13 +122,13 @@ export default function HomePage() {
                 <RisingStars chainIds={effectiveChainIds} />
             </div>
 
-            {/* Row 5: Filters — stack above table card so MultiSelect dropdowns paint over the table */}
-            <div className="relative z-20 mb-6">
+            {/* Row 5: Filters */}
+            <div className="relative z-10 mb-6 overflow-visible">
                 <DashboardFilters chains={chains} value={filter} onChange={setFilter} />
             </div>
 
             {/* Row 6: Agents table */}
-            <div className="relative z-0 bg-card border border-border rounded-xl p-4 md:p-5">
+            <div className="relative isolate z-0 bg-card border border-border rounded-xl p-4 md:p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-white/5">
                     <div className="flex bg-black/40 border border-border rounded-md px-3 py-2 items-center flex-1 min-w-[240px] max-w-sm focus-within:border-primary transition-colors">
                         <Search size={14} className="text-muted shrink-0 mr-2" />

@@ -54,7 +54,7 @@ const DEFAULT_PAGE_SIZE = DEFAULT_FEEDBACK_PAGE_SIZE;
 
 function AgentsTableThead() {
     return (
-        <thead className="bg-black/40 text-muted uppercase text-xs sticky top-0 font-semibold tracking-wider">
+        <thead className="bg-black/40 text-muted uppercase text-xs sticky top-0 z-[1] font-semibold tracking-wider">
             <tr>
                 <th scope="col" className="w-[24%] px-4 py-2.5 font-medium border-b border-white/5">Name</th>
                 <th scope="col" className="w-[11%] px-4 py-2.5 font-medium border-b border-white/5">Chain</th>

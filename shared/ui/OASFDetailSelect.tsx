@@ -6,8 +6,10 @@
 // description, so a separate group header is unnecessary. Filterable via search.
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Check, ChevronDown, Search, X } from "lucide-react";
 import { OASFEntry } from "@/shared/api/oasf-schema";
+import { useFloatingPanel } from "@/shared/ui/useFloatingPanel";
 
 export interface OASFDetailSelectProps {
     label: string;
@@ -23,15 +25,21 @@ export function OASFDetailSelect({ label, placeholder = "Any", entries, counts, 
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState("");
     const rootRef = useRef<HTMLDivElement>(null);
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const panelRef = useRef<HTMLDivElement>(null);
+    const panelRect = useFloatingPanel(open, triggerRef);
     const selectedSet = useMemo(() => new Set(selected), [selected]);
 
     useEffect(() => {
+        if (!open) return;
         function onDown(e: MouseEvent) {
-            if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
+            const t = e.target as Node;
+            if (rootRef.current?.contains(t) || panelRef.current?.contains(t)) return;
+            setOpen(false);
         }
         document.addEventListener("mousedown", onDown);
         return () => document.removeEventListener("mousedown", onDown);
-    }, []);
+    }, [open]);
 
     // Fuzzy-ish filter: match caption, description, category, or full key.
     const filtered = useMemo(() => {
@@ -77,6 +85,7 @@ export function OASFDetailSelect({ label, placeholder = "Any", entries, counts, 
 
             {/* Trigger */}
             <button
+                ref={triggerRef}
                 type="button"
                 onClick={() => setOpen((v) => !v)}
                 aria-expanded={open}
@@ -122,8 +131,12 @@ export function OASFDetailSelect({ label, placeholder = "Any", entries, counts, 
             </button>
 
             {/* Popup */}
-            {open && (
-                <div className="absolute top-full mt-1 left-0 z-50 w-[480px] max-w-[calc(100vw-32px)] bg-card border border-border rounded-xl shadow-2xl overflow-hidden">
+            {open && panelRect && typeof document !== "undefined" && createPortal(
+                <div
+                    ref={panelRef}
+                    className="fixed z-[100] w-[480px] max-w-[calc(100vw-32px)] bg-card border border-border rounded-xl shadow-2xl overflow-hidden"
+                    style={{ top: panelRect.top, left: panelRect.left }}
+                >
                     {/* Search */}
                     <div className="px-3 py-2 border-b border-border bg-black/20">
                         <div className="flex items-center gap-2 bg-black/40 border border-border rounded-md px-2 py-1.5 focus-within:border-primary transition-colors">
@@ -222,7 +235,8 @@ export function OASFDetailSelect({ label, placeholder = "Any", entries, counts, 
                             </button>
                         </div>
                     )}
-                </div>
+                </div>,
+                document.body,
             )}
         </div>
     );

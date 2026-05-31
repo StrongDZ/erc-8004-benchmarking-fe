@@ -4,7 +4,9 @@
 // (no radix / no headlessui) to stay within the existing dependency set.
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Check, ChevronDown, Search, X } from 'lucide-react';
+import { useFloatingPanel } from '@/shared/ui/useFloatingPanel';
 
 export interface MultiSelectOption {
     value: string;
@@ -36,14 +38,20 @@ export function MultiSelect({
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState('');
     const rootRef = useRef<HTMLDivElement>(null);
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const panelRef = useRef<HTMLDivElement>(null);
+    const panelRect = useFloatingPanel(open, triggerRef);
 
     useEffect(() => {
+        if (!open) return;
         function handler(e: MouseEvent) {
-            if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
+            const t = e.target as Node;
+            if (rootRef.current?.contains(t) || panelRef.current?.contains(t)) return;
+            setOpen(false);
         }
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
-    }, []);
+    }, [open]);
 
     useEffect(() => {
         if (!onSearch) return;
@@ -77,6 +85,7 @@ export function MultiSelect({
         <div ref={rootRef} className="relative">
             <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">{label}</div>
             <button
+                ref={triggerRef}
                 type="button"
                 onClick={() => setOpen((v) => !v)}
                 aria-expanded={open}
@@ -115,8 +124,12 @@ export function MultiSelect({
                 </div>
             </button>
 
-            {open && (
-                <div className="absolute top-full mt-1 left-0 right-0 z-40 bg-card border border-border rounded-xl shadow-2xl overflow-hidden">
+            {open && panelRect && typeof document !== 'undefined' && createPortal(
+                <div
+                    ref={panelRef}
+                    className="fixed z-[100] bg-card border border-border rounded-xl shadow-2xl overflow-hidden"
+                    style={{ top: panelRect.top, left: panelRect.left, width: panelRect.width }}
+                >
                     {searchable && (
                         <div className="flex items-center gap-2 border-b border-border px-3 py-2">
                             <Search size={13} className="text-muted" />
@@ -154,7 +167,8 @@ export function MultiSelect({
                             );
                         })}
                     </div>
-                </div>
+                </div>,
+                document.body,
             )}
         </div>
     );
