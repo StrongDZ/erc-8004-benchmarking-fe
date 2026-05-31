@@ -2,6 +2,7 @@ import { apiFetch } from '@/shared/api/core/http';
 import type {
     AgentOverview,
     AgentProfile,
+    AgentRegistrationList,
     Feedback,
     HeatmapDay,
     IdentityEvent,
@@ -9,7 +10,7 @@ import type {
     Penalty,
     ProofData,
     RadarData,
-    ReputationScorePoint,
+    TrustScorePoint,
 } from '@/shared/api/types';
 
 export const agentsApi = {
@@ -19,8 +20,8 @@ export const agentsApi = {
     agentOverview: (chainId: number, agentId: string) =>
         apiFetch<AgentOverview>(`/agents/${chainId}/${agentId}/overview`),
 
-    reputationScoreHistory: (chainId: number, agentId: string) =>
-        apiFetch<{ points: ReputationScorePoint[] }>(`/agents/${chainId}/${agentId}/reputation-score-history`),
+    trustScoreHistory: (chainId: number, agentId: string) =>
+        apiFetch<{ points: TrustScorePoint[] }>(`/agents/${chainId}/${agentId}/trust-score-history`),
 
     radar: (chainId: number, agentId: string) =>
         apiFetch<RadarData>(`/agents/${chainId}/${agentId}/radar`),
@@ -49,4 +50,7 @@ export const agentsApi = {
 
     proof: (chainId: number, agentId: string, txHash: string) =>
         apiFetch<ProofData>(`/agents/${chainId}/${agentId}/proof/${txHash}`),
+
+    agentRegistrations: (chainId: number, agentId: string) =>
+        apiFetch<AgentRegistrationList>(`/agents/${chainId}/${agentId}/registrations`),
 };

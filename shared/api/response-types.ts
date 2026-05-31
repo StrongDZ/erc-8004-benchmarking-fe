@@ -166,7 +166,8 @@ export interface AgentOverview {
     offchainMetadata?: Record<string, unknown>;
 }
 
-export interface ReputationScorePoint {
+export interface TrustScorePoint {
+    /** Composite trust score in [0, 100] at this point in time. */
     timestamp: string;
     score: number;
     type: 'event' | 'decay';
@@ -209,6 +210,7 @@ export interface Feedback {
     timestampUnix?: number;
     revokeTxHash: string | null;
     feedbackURI?: string;
+    feedbackParsed?: any;
     /** Scale detected by the backend for this (tag1, tag2) pair: binary | star5 | star10 | pct100 | unbounded | "" */
     valueScale?: string;
     classification?: FeedbackClassification;
@@ -312,4 +314,31 @@ export interface WalletFeedback extends Feedback {
     agentName?: string;
 }
 
+export interface WalletProfile {
+    address: string;
+    chainId: number;
+    kind: 'user' | 'owner';
+    trustScore: number;
+    trustScorePropagated: number;
+    feedbackTotalCount: number;
+    feedbackValidCount: number;
+    feedbackJunkCount: number;
+    junkRatio: number;
+    ownedAgentIds?: string[];
+}
+
 export type { FeedbackClassification } from '@/shared/lib/feedbackClassification';
+
+export interface AgentRegistration {
+    chainId: number;
+    agentId: string;
+    name?: string;
+    active: boolean;
+    isCurrent: boolean;
+}
+
+export interface AgentRegistrationList {
+    agentWallet?: string;
+    matchedBy: string;
+    registrations: AgentRegistration[];
+}
