@@ -110,50 +110,46 @@ export default function RealtimeEventFeed({ max = 4 }: Props) {
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto overflow-x-auto pr-1 -mr-1 rounded-lg border border-border bg-black/20">
-                <table className="data-table table-fixed w-full min-w-[520px] text-sm">
-                    <colgroup>
-                        <col style={{ width: '12%' }} />
-                        <col style={{ width: '15%' }} />
-                        <col style={{ width: '17%' }} />
-                        <col style={{ width: '10%' }} />
-                        <col style={{ width: '18%' }} />
-                        <col style={{ width: '10%' }} />
-                        <col style={{ width: '15%' }} />
-                    </colgroup>
-                    <thead>
-                        <tr>
-                            <th className="px-2 py-2.5">Type</th>
-                            <th className="px-2 py-2.5">Event</th>
-                            <th className="px-2 py-2.5">Chain</th>
-                            <th className="px-2 py-2.5">Agent</th>
-                            <th className="px-2 py-2.5">Tx</th>
-                            <th className="px-2 py-2.5 text-right">Block</th>
-                            <th className="px-2 py-2.5">Time</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                        {events.length === 0 ? (
+            {events.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center text-center text-muted text-sm gap-2 rounded-lg border border-border bg-black/20 min-h-[200px]">
+                    <Activity size={24} className="text-muted/60" />
+                    <span>Waiting for on-chain events…</span>
+                </div>
+            ) : (
+                <div className="flex-1 overflow-y-auto overflow-x-auto pr-1 -mr-1 rounded-lg border border-border bg-black/20">
+                    <table className="data-table table-fixed w-full min-w-[700px] text-sm">
+                        <colgroup>
+                            <col style={{ width: '12%' }} />
+                            <col style={{ width: '15%' }} />
+                            <col style={{ width: '17%' }} />
+                            <col style={{ width: '10%' }} />
+                            <col style={{ width: '18%' }} />
+                            <col style={{ width: '10%' }} />
+                            <col style={{ width: '15%' }} />
+                        </colgroup>
+                        <thead>
                             <tr>
-                                <td colSpan={COL_COUNT} className="py-10">
-                                    <div className="flex flex-col items-center justify-center text-center text-muted text-sm gap-2">
-                                        <Activity size={24} className="text-muted/60" />
-                                        <span>Waiting for on-chain events…</span>
-                                    </div>
-                                </td>
+                                <th className="px-2 py-2.5">Type</th>
+                                <th className="px-2 py-2.5">Event</th>
+                                <th className="px-2 py-2.5">Chain</th>
+                                <th className="px-2 py-2.5">Agent</th>
+                                <th className="px-2 py-2.5">Tx</th>
+                                <th className="px-2 py-2.5 text-right">Block</th>
+                                <th className="px-2 py-2.5">Time</th>
                             </tr>
-                        ) : (
-                            events.map((ev) => (
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                            {events.map((ev) => (
                                 <EventTableRow
                                     key={`${ev.chainId}:${ev.txHash}:${ev.logIndex ?? 0}`}
                                     ev={ev}
                                     chain={chainMap.get(ev.chainId)}
                                 />
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 }

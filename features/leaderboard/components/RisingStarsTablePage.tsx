@@ -5,13 +5,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, TrendingUp } from 'lucide-react';
 import { api, RisingStar, resolveIPFS } from '@/shared/api/client';
+import { RISING_STAR_PERIODS } from '@/shared/constants/app';
 import { useChain } from '@/providers/ChainProvider';
 import { FALLBACK_AVATAR_DATA_URI } from '@/shared/constants/app';
 import { ChainBadge } from '@/shared/ui/ChainBadge';
 import PageNavigation from '@/shared/ui/PageNavigation';
 import { Skeleton } from '@/shared/ui/Skeleton';
 
-const PERIODS = ['24h', '7d', '30d'] as const;
 const API_MAX = 50;
 const PAGE_SIZE = 15;
 
@@ -44,7 +44,7 @@ export default function RisingStarsTablePage() {
 
     useEffect(() => {
         const p = searchParams.get('period')?.trim() || '24h';
-        setPeriod(PERIODS.includes(p as (typeof PERIODS)[number]) ? p : '24h');
+        setPeriod(RISING_STAR_PERIODS.includes(p as (typeof RISING_STAR_PERIODS)[number]) ? p : '24h');
         setScopeIds(parseChainIds(searchParams.get('chainId'), defaultChainIds));
     }, [searchParams, defaultChainIds]);
 
@@ -107,7 +107,7 @@ export default function RisingStarsTablePage() {
 
             <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-4">
                 <div className="flex flex-wrap gap-1 rounded-md border border-border bg-black/30 p-1">
-                    {PERIODS.map((p) => (
+                    {RISING_STAR_PERIODS.map((p) => (
                         <button
                             key={p}
                             type="button"

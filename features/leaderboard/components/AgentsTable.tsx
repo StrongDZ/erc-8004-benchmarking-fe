@@ -5,10 +5,11 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AgentService, Chain, LeaderboardAgent, resolveIPFS, truncateAddress } from "@/shared/api/client";
-import { FALLBACK_AVATAR_DATA_URI } from "@/shared/constants/app";
+import { AgentService, Chain, LeaderboardAgent, truncateAddress } from "@/shared/api/client";
+import { DEFAULT_FEEDBACK_PAGE_SIZE } from "@/shared/constants/app";
 import { Badge } from "@/shared/ui/Badge";
 import { ChainBadge } from "@/shared/ui/ChainBadge";
+import { AgentAvatar } from "@/shared/ui/AgentAvatar";
 
 interface Props {
     agents: LeaderboardAgent[];
@@ -18,13 +19,11 @@ interface Props {
     pageSize?: number;
 }
 
-function fallbackImg(e: React.SyntheticEvent<HTMLImageElement>) {
-    (e.target as HTMLImageElement).src = FALLBACK_AVATAR_DATA_URI;
-}
-
 function formatCreated(ts?: number): string {
     if (!ts) return "—";
-    const diff = Date.now() - ts * 1000;
+    const ms = ts < 1e12 ? ts * 1000 : ts;
+    const diff = Date.now() - ms;
+    if (diff < 0) return "just now";
     const sec = Math.floor(diff / 1000);
     if (sec < 60) return "just now";
     const min = Math.floor(sec / 60);
@@ -33,16 +32,16 @@ function formatCreated(ts?: number): string {
     if (hr < 24) return `${hr}h ago`;
     const d = Math.floor(hr / 24);
     if (d < 30) return `${d}d ago`;
-    return new Date(ts * 1000).toLocaleDateString();
+    return new Date(ms).toLocaleDateString();
 }
 
 function serviceCell(services?: AgentService[]) {
     if (!services?.length) return <span className="text-muted text-xs">—</span>;
     const full = services.map((s) => s.name).join(", ");
     return (
-        <div className="flex min-w-0 flex-nowrap items-center gap-1 overflow-hidden" title={full}>
+        <div className="flex min-w-0 flex-wrap items-center gap-1" title={full}>
             {services.slice(0, 3).map((s) => (
-                <Badge key={s.name} variant="primary" size="xxs" className="max-w-[5.5rem] truncate shrink-0">
+                <Badge key={s.name} variant="primary" size="xxs" className="truncate max-w-[5.5rem] shrink-0">
                     {s.name}
                 </Badge>
             ))}
@@ -51,19 +50,19 @@ function serviceCell(services?: AgentService[]) {
     );
 }
 
-const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = DEFAULT_FEEDBACK_PAGE_SIZE;
 
 function AgentsTableThead() {
     return (
         <thead className="bg-black/40 text-muted uppercase text-xs sticky top-0 font-semibold tracking-wider">
             <tr>
-                <th className="w-[24%] px-4 py-2.5 font-medium border-b border-white/5">Name</th>
-                <th className="w-[11%] px-4 py-2.5 font-medium border-b border-white/5">Chain</th>
-                <th className="w-[22%] px-4 py-2.5 font-medium border-b border-white/5">Service</th>
-                <th className="w-[7%] px-4 py-2.5 font-medium border-b border-white/5 text-right">Score</th>
-                <th className="w-[9%] px-4 py-2.5 font-medium border-b border-white/5 text-right">Feedback</th>
-                <th className="w-[15%] px-4 py-2.5 font-medium border-b border-white/5">Owner</th>
-                <th className="w-[12%] px-4 py-2.5 font-medium border-b border-white/5 text-right">Created</th>
+                <th scope="col" className="w-[24%] px-4 py-2.5 font-medium border-b border-white/5">Name</th>
+                <th scope="col" className="w-[11%] px-4 py-2.5 font-medium border-b border-white/5">Chain</th>
+                <th scope="col" className="w-[22%] px-4 py-2.5 font-medium border-b border-white/5">Service</th>
+                <th scope="col" className="w-[7%] px-4 py-2.5 font-medium border-b border-white/5 text-right">Score</th>
+                <th scope="col" className="w-[9%] px-4 py-2.5 font-medium border-b border-white/5 text-right">Feedback</th>
+                <th scope="col" className="w-[15%] px-4 py-2.5 font-medium border-b border-white/5">Owner</th>
+                <th scope="col" className="w-[12%] px-4 py-2.5 font-medium border-b border-white/5 text-right">Created</th>
             </tr>
         </thead>
     );
@@ -72,7 +71,7 @@ function AgentsTableThead() {
 function AgentsTableShell({ children }: { children: ReactNode }) {
     return (
         <div className="w-full overflow-x-auto rounded-lg border border-border bg-black/20">
-            <table className="data-table w-full table-fixed text-left text-sm">
+            <table className="data-table w-full table-fixed text-left text-sm min-w-[900px]">
                 <AgentsTableThead />
                 {children}
             </table>
@@ -135,9 +134,11 @@ export default function AgentsTable({ agents, chains = [], loading, pageSize = D
             <AgentsTableShell>
                 <tbody>
                     <tr>
-                        <td colSpan={7} className="py-16 text-center text-muted">
-                            <p className="font-medium">No agents match your filters.</p>
-                            <p className="text-xs mt-1 text-subtle">Try clearing some filters to expand the result set.</p>
+                        <td colSpan={7} className="py-16 text-muted">
+                            <div className="sticky left-0 w-full flex flex-col items-center justify-center px-4" style={{ width: 'max(100vw - 4rem, 100%)' }}>
+                                <p className="font-medium">No agents match your filters.</p>
+                                <p className="text-xs mt-1 text-subtle">Try clearing some filters to expand the result set.</p>
+                            </div>
                         </td>
                     </tr>
                     {Array.from({ length: Math.max(0, pageSize - 1) }).map((_, i) => (
@@ -167,20 +168,23 @@ export default function AgentsTable({ agents, chains = [], loading, pageSize = D
                         >
                             <td className="max-w-0 px-4 py-2.5 align-middle">
                                 <div className="flex min-w-0 items-center gap-2">
-                                    <img
-                                        src={resolveIPFS(a.image)}
+                                    <AgentAvatar
+                                        image={a.image}
+                                        seed={a.agentId}
+                                        size={36}
                                         alt={a.name ? `${a.name} avatar` : `Agent ${a.agentId} avatar`}
-                                        className="h-9 w-9 shrink-0 rounded-full border border-border group-hover:border-primary transition-colors"
-                                        onError={fallbackImg}
+                                        className="h-9 w-9 shrink-0 rounded-full border border-border group-hover:border-primary transition-colors object-cover"
                                     />
                                     <div className="min-w-0 flex-1">
                                         <div className="flex min-w-0 items-center gap-1 leading-none">
-                                            <span
-                                                className="min-w-0 truncate text-sm font-semibold leading-tight text-white group-hover:text-primary transition-colors"
+                                            <Link
+                                                href={`/agents/${a.chainId}/${a.agentId}`}
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="min-w-0 truncate text-sm font-semibold leading-tight text-white hover:text-primary group-hover:text-primary transition-colors focus:underline focus:outline-none"
                                                 title={a.name || `Agent #${a.agentId}`}
                                             >
                                                 {a.name || `Agent #${a.agentId}`}
-                                            </span>
+                                            </Link>
                                             <span className="flex shrink-0 items-center gap-0.5">
                                                 {a.hasOASF && (
                                                     <Badge variant="success" size="xxs">OASF</Badge>

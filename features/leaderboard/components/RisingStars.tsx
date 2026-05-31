@@ -3,23 +3,19 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Rocket, TrendingUp, Zap } from 'lucide-react';
-import { api, RisingStar, resolveIPFS } from '@/shared/api/client';
+import { api, RisingStar } from '@/shared/api/client';
+import { RISING_STAR_PERIODS } from '@/shared/constants/app';
 import { useChain } from '@/providers/ChainProvider';
-import { FALLBACK_AVATAR_DATA_URI } from '@/shared/constants/app';
 import { Badge } from '@/shared/ui/Badge';
 import { ChainBadge } from '@/shared/ui/ChainBadge';
 import { Skeleton } from '@/shared/ui/Skeleton';
+import { AgentAvatar } from '@/shared/ui/AgentAvatar';
 
 interface Props {
     chainIds: number[];
 }
 
-const PERIODS = ['24h', '7d', '30d'] as const;
 const STRIP_FETCH = 10;
-
-function fallbackImg(e: React.SyntheticEvent<HTMLImageElement>) {
-    (e.target as HTMLImageElement).src = FALLBACK_AVATAR_DATA_URI;
-}
 
 export default function RisingStars({ chainIds }: Props) {
     const { chains } = useChain();
@@ -80,7 +76,7 @@ export default function RisingStars({ chainIds }: Props) {
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                         <div className="flex gap-1 rounded-md border border-border bg-black/30 p-1">
-                            {PERIODS.map((p) => (
+                            {RISING_STAR_PERIODS.map((p) => (
                                 <button
                                     key={p}
                                     type="button"
@@ -147,36 +143,39 @@ export default function RisingStars({ chainIds }: Props) {
                                     aria-hidden
                                 />
                                 <div className="relative flex w-full flex-col pl-2">
-                                    <div className="mb-3 flex items-start justify-between gap-2">
-                                        <span
-                                            className={`inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-md px-1.5 text-[11px] font-bold ${
-                                                idx === 0
-                                                    ? 'bg-primary text-black'
-                                                    : idx === 1
-                                                      ? 'bg-zinc-300 text-black'
-                                                      : idx === 2
-                                                        ? 'bg-amber-400/90 text-black'
-                                                        : 'bg-white/10 text-muted'
-                                            }`}
-                                        >
-                                            #{idx + 1}
-                                        </span>
-                                        {idx === 0 && (
-                                            <Badge variant="success" size="xs" className="shrink-0 gap-0.5">
-                                                <Zap size={9} /> Top
-                                            </Badge>
-                                        )}
-                                    </div>
                                     <div className="mb-3 flex items-center gap-3">
-                                        <img
-                                            src={resolveIPFS(star.image)}
-                                            alt={star.name || 'Agent'}
-                                            className="h-12 w-12 rounded-full border border-border object-cover transition-colors group-hover:border-primary/70"
-                                            onError={fallbackImg}
-                                        />
+                                        <div className="relative shrink-0">
+                                            <AgentAvatar
+                                                image={star.image}
+                                                seed={star.agentId}
+                                                size={48}
+                                                alt={star.name || 'Agent'}
+                                                className="h-12 w-12 rounded-full border border-border object-cover transition-colors group-hover:border-primary/70"
+                                            />
+                                            <span
+                                                className={`absolute -bottom-1 -right-1 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded px-1 text-[10px] font-bold leading-none ${
+                                                    idx === 0
+                                                        ? 'bg-primary text-black'
+                                                        : idx === 1
+                                                          ? 'bg-zinc-300 text-black'
+                                                          : idx === 2
+                                                            ? 'bg-amber-400/90 text-black'
+                                                            : 'bg-white/10 text-muted'
+                                                }`}
+                                            >
+                                                #{idx + 1}
+                                            </span>
+                                        </div>
                                         <div className="min-w-0 flex-1">
-                                            <div className="truncate font-bold text-white group-hover:text-primary">
-                                                {star.name || `Agent ${star.agentId.slice(0, 8)}…`}
+                                            <div className="flex items-center gap-1.5 min-w-0">
+                                                <span className="truncate font-bold text-white group-hover:text-primary">
+                                                    {star.name || `Agent ${star.agentId.slice(0, 8)}…`}
+                                                </span>
+                                                {idx === 0 && (
+                                                    <Badge variant="success" size="xs" className="shrink-0 gap-0.5">
+                                                        <Zap size={9} /> Top
+                                                    </Badge>
+                                                )}
                                             </div>
                                             <ChainBadge
                                                 chainId={star.chainId}

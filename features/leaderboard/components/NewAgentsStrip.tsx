@@ -6,20 +6,16 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
-import { api, LeaderboardAgent, resolveIPFS } from '@/shared/api/client';
+import { api, LeaderboardAgent } from '@/shared/api/client';
 import { useChain } from '@/providers/ChainProvider';
-import { FALLBACK_AVATAR_DATA_URI } from '@/shared/constants/app';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { Badge } from '@/shared/ui/Badge';
 import { ChainBadge } from '@/shared/ui/ChainBadge';
+import { AgentAvatar } from '@/shared/ui/AgentAvatar';
 
 interface Props {
     chainIds: number[];
     limit?: number;
-}
-
-function fallbackImg(e: React.SyntheticEvent<HTMLImageElement>) {
-    (e.target as HTMLImageElement).src = FALLBACK_AVATAR_DATA_URI;
 }
 
 function relativeTime(createdAt?: number): string {
@@ -82,26 +78,34 @@ export default function NewAgentsStrip({ chainIds, limit = 8 }: Props) {
                     <Link
                         key={`${a.chainId}:${a.agentId}`}
                         href={`/agents/${a.chainId}/${a.agentId}`}
-                        className="group flex-shrink-0 w-[260px] snap-start bg-black/30 border border-border rounded-xl p-4 hover:border-primary/60 hover:bg-white/5 transition-colors"
+                        className="group relative flex-shrink-0 w-[260px] snap-start overflow-hidden bg-gradient-to-br from-black/50 to-black/20 border border-border rounded-xl p-4 hover:border-accent/60 hover:bg-white/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_48px_-20px_rgba(139,92,246,0.25)]"
                     >
-                        <div className="flex items-center gap-3 mb-3">
-                            <img
-                                src={resolveIPFS(a.image)}
-                                alt={a.name}
-                                className="w-12 h-12 rounded-full border border-border group-hover:border-primary transition-colors"
-                                onError={fallbackImg}
-                            />
-                            <div className="flex flex-col min-w-0 flex-1 gap-1.5">
-                                <span className="font-bold text-white truncate">{a.name || `Agent #${a.agentId}`}</span>
-                                <ChainBadge chainId={a.chainId} chain={chainMap.get(a.chainId)} size="md" className="w-fit" />
+                        <div
+                            className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-gradient-to-b from-accent via-purple-400/90 to-accent/40 opacity-90"
+                            aria-hidden
+                        />
+                        <div className="relative flex flex-col w-full pl-2">
+                            <div className="flex items-center gap-3 mb-3">
+                                <AgentAvatar
+                                    image={a.image}
+                                    seed={a.agentId}
+                                    size={48}
+                                    alt={a.name || `Agent #${a.agentId}`}
+                                    className="h-12 w-12 rounded-full border border-border group-hover:border-accent/70 transition-colors object-cover"
+                                />
+                                <div className="flex flex-col min-w-0 flex-1 gap-1.5">
+                                    <span className="font-bold text-white truncate group-hover:text-accent transition-colors">{a.name || `Agent #${a.agentId}`}</span>
+                                    <ChainBadge chainId={a.chainId} chain={chainMap.get(a.chainId)} size="md" className="w-fit" />
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1.5">
-                                {a.hasOASF && <Badge variant="success" size="xs">OASF</Badge>}
-                                {a.x402Support && <Badge variant="primary" size="xs">x402</Badge>}
+                            <div className="flex items-center justify-between border-t border-white/5 pt-3">
+                                <div className="flex items-center gap-1.5">
+                                    {a.hasOASF && <Badge variant="success" size="xs">OASF</Badge>}
+                                    {a.x402Support && <Badge variant="primary" size="xs">x402</Badge>}
+                                    {!a.hasOASF && !a.x402Support && <span className="text-[10px] text-subtle">—</span>}
+                                </div>
+                                <span className="text-xs text-subtle">{relativeTime(a.createdAt)}</span>
                             </div>
-                            <span className="text-xs text-subtle">{relativeTime(a.createdAt)}</span>
                         </div>
                     </Link>
                 ))}

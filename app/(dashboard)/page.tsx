@@ -135,6 +135,7 @@ export default function HomePage() {
                         <input
                             className="bg-transparent border-none outline-none text-white w-full placeholder:text-muted/60 text-sm"
                             placeholder="Search name, agent ID, OASF skill or domain…"
+                            aria-label="Search name, agent ID, OASF skill or domain"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                         />
@@ -142,6 +143,7 @@ export default function HomePage() {
                     <div className="flex items-center gap-3">
                         <select
                             className="bg-black/40 border border-border text-white px-3 py-2 rounded-md outline-none focus:border-primary transition-colors text-sm"
+                            aria-label="Sort agents"
                             value={sort}
                             onChange={(e) => setSort(e.target.value as SortKey)}
                         >
