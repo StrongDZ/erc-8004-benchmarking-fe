@@ -112,28 +112,29 @@ export function FeedbackCard({ feedback: fb, chainId }: FeedbackCardProps) {
             )}
           </div>
 
-          {/* Via line: endpoint + feedbackURI */}
+          {/* Via line — only rendered when endpoint or feedbackURI exists.
+               Endpoint is fixed w-[10rem] so feedbackURI always sits at the same position. */}
           {hasVia && (
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
-              <span className="text-[11px] text-subtle/60">via</span>
-              {fb.endpoint?.trim() && (
-                <LinkOutbound
-                  href={ensureHttpsUrl(fb.endpoint)}
-                  external
-                  className="font-mono text-[11px] text-subtle hover:text-muted transition-colors max-w-[14rem]"
-                  title={fb.endpoint}
-                >
-                  {fb.endpoint.replace(/^https?:\/\//, '')}
-                </LinkOutbound>
-              )}
-              {fb.feedbackURI && fb.endpoint && (
-                <span className="text-subtle/50 text-[11px]">·</span>
-              )}
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-[11px] text-subtle/60 shrink-0">via</span>
+              {/* Fixed-width slot: endpoint or empty spacer to hold position */}
+              <span className="w-[10rem] min-w-0 shrink-0">
+                {fb.endpoint?.trim() ? (
+                  <LinkOutbound
+                    href={ensureHttpsUrl(fb.endpoint)}
+                    external
+                    className="font-mono text-[11px] text-subtle hover:text-muted transition-colors w-full"
+                    title={fb.endpoint}
+                  >
+                    {fb.endpoint.replace(/^https?:\/\//, '')}
+                  </LinkOutbound>
+                ) : null}
+              </span>
               {fb.feedbackURI && (
                 <LinkOutbound
                   href={resolveIPFS(fb.feedbackURI)}
                   external
-                  className="text-[11px] text-subtle hover:text-accent transition-colors"
+                  className="text-[11px] text-subtle hover:text-accent transition-colors shrink-0"
                   title={fb.feedbackURI}
                 >
                   URI
