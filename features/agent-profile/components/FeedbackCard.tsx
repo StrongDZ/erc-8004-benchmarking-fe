@@ -48,7 +48,7 @@ export function FeedbackCard({ feedback: fb, chainId }: FeedbackCardProps) {
   const tag2 = fb.tag2?.trim();
   const tagLabel = [tag1, tag2].filter(Boolean).join(' | ');
 
-  const hasVia = !!(fb.endpoint?.trim() || fb.feedbackURI);
+  const hasVia = !!fb.endpoint?.trim();
 
   return (
     <div
