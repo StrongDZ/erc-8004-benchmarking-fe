@@ -14,7 +14,7 @@ interface FeedbackFeedProps {
   agentId: string;
 }
 
-const CATEGORIES = ['all', 'service_feedback', 'config_feedback', 'app_specific', 'junk', 'others'] as const;
+const CATEGORIES = ['all', 'service_feedback', 'config_feedback', 'app_specific', 'spam', 'others'] as const;
 const PAGE_SIZE = DEFAULT_FEEDBACK_PAGE_SIZE;
 
 export default function FeedbackFeed({ chainId, agentId }: FeedbackFeedProps) {

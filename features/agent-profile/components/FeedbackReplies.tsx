@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { MessageSquare } from 'lucide-react';
 import { truncateAddress, explorerUrl } from '@/shared/api/client';
 import { LinkOutbound } from '@/shared/ui/LinkOutbound';
@@ -23,13 +24,13 @@ function ReplyRow({ res, chainId }: { res: Response; chainId: number }) {
   return (
     <div className="relative pl-4 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[2px] before:rounded-full before:bg-purple-900/60">
       <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 mb-0.5">
-        <LinkOutbound
+        <Link
           href={`/wallet/${res.responder}`}
-          className="font-mono text-xs text-muted hover:text-primary transition-colors"
+          className="font-mono text-xs text-muted hover:text-primary transition-colors truncate"
           title={res.responder}
         >
           {truncateAddress(res.responder)}
-        </LinkOutbound>
+        </Link>
         {res.txHash && (
           <LinkOutbound
             href={explorerUrl(chainId, res.txHash)}
