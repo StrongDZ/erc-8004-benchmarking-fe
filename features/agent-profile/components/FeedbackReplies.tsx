@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { MessageSquare } from 'lucide-react';
-import { truncateAddress, explorerUrl } from '@/shared/api/client';
+import Link from 'next/link';
+import { truncateAddress, explorerUrl, resolveIPFS } from '@/shared/api/client';
 import { LinkOutbound } from '@/shared/ui/LinkOutbound';
+import { AgentAvatar } from '@/shared/ui/AgentAvatar';
+import { FeedbackContentCell } from '@/shared/ui/feedback';
 import type { Feedback } from '@/shared/api/types';
 
 type Response = NonNullable<Feedback['responses']>[number];
@@ -16,47 +18,89 @@ interface FeedbackRepliesProps {
 
 const INITIAL_VISIBLE = 3;
 
-function ReplyRow({ res, chainId }: { res: Response; chainId: number }) {
+function ReplyCard({ res, chainId }: { res: Response; chainId: number }) {
   const [expanded, setExpanded] = useState(false);
-  const comment = res.responseParsed?.comment ?? '';
-  const isLong = comment.length > 160;
+  const comment: string = res.responseParsed?.comment ?? '';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const attachments: any[] = Array.isArray(res.responseParsed?.attachments)
+    ? res.responseParsed.attachments
+    : [];
+  const isLong = comment.length > 200;
+  const hasContent = comment.trim().length > 0 || attachments.length > 0;
 
   return (
-    <div className="relative pl-4 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[2px] before:rounded-full before:bg-purple-900/60">
-      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 mb-0.5">
-        <Link
-          href={`/wallet/${res.responder}`}
-          className="font-mono text-xs text-muted hover:text-primary transition-colors truncate"
-          title={res.responder}
-        >
-          {truncateAddress(res.responder)}
-        </Link>
-        {res.txHash && (
-          <LinkOutbound
-            href={explorerUrl(chainId, res.txHash)}
-            external
-            className="font-mono text-[11px] text-subtle hover:text-primary transition-colors"
-            title={res.txHash}
-          >
-            {res.txHash.slice(0, 6)}…{res.txHash.slice(-4)}
-          </LinkOutbound>
-        )}
+    <div className="relative pl-4 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[2px] before:rounded-full before:bg-purple-900/50">
+      {/* Mini header: avatar + address + txHash */}
+      <div className="flex items-start gap-2">
+        <AgentAvatar seed={res.responder} size={24} className="mt-0.5 shrink-0" />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+            <Link
+              href={`/wallet/${res.responder}`}
+              className="font-mono text-xs text-white hover:text-primary transition-colors truncate"
+              title={res.responder}
+            >
+              {truncateAddress(res.responder)}
+            </Link>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
+            {res.txHash && (
+              <LinkOutbound
+                href={explorerUrl(chainId, res.txHash)}
+                external
+                className="font-mono text-[11px] text-subtle hover:text-muted transition-colors"
+                title={res.txHash}
+              >
+                {res.txHash.slice(0, 8)}…{res.txHash.slice(-6)}
+              </LinkOutbound>
+            )}
+            {res.responseURI && (
+              <>
+                <span className="text-subtle/50 text-[11px]">·</span>
+                <LinkOutbound
+                  href={resolveIPFS(res.responseURI)}
+                  external
+                  className="text-[11px] text-subtle hover:text-accent transition-colors"
+                  title={res.responseURI}
+                >
+                  URI
+                </LinkOutbound>
+              </>
+            )}
+          </div>
+        </div>
       </div>
-      {comment && (
-        <p
-          className={`text-xs text-muted leading-relaxed whitespace-pre-wrap break-words ${!expanded && isLong ? 'line-clamp-2' : ''}`}
-        >
-          {comment}
-        </p>
-      )}
-      {isLong && (
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          className="text-[11px] text-purple-400 hover:text-purple-300 transition-colors mt-0.5"
-        >
-          {expanded ? 'Show less' : 'Show more'}
-        </button>
+
+      {/* Comment + attachments */}
+      {hasContent && (
+        <div className="mt-2 pl-8">
+          {comment && (
+            <div>
+              <p
+                className={[
+                  'text-xs text-muted leading-relaxed whitespace-pre-wrap break-words',
+                  !expanded && isLong ? 'line-clamp-2' : '',
+                ].join(' ')}
+              >
+                {comment}
+              </p>
+              {isLong && (
+                <button
+                  type="button"
+                  onClick={() => setExpanded((v) => !v)}
+                  className="text-[11px] text-purple-400 hover:text-purple-300 transition-colors mt-0.5"
+                >
+                  {expanded ? 'Show less' : 'Show more'}
+                </button>
+              )}
+            </div>
+          )}
+          {attachments.length > 0 && (
+            <div className={comment ? 'mt-1.5' : ''}>
+              <FeedbackContentCell comment="" attachments={attachments} />
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
@@ -73,22 +117,23 @@ export function FeedbackReplies({ responses, chainId }: FeedbackRepliesProps) {
   const visible = responses.slice(0, visibleCount);
 
   return (
-    <div className="mt-2 pt-2 border-t border-white/5">
+    <div className="mt-3 pt-3 border-t border-white/5">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 text-xs text-purple-400 hover:text-purple-300 transition-colors mb-2"
+        className="flex items-center gap-1.5 text-xs text-purple-400 hover:text-purple-300 transition-colors"
       >
         <MessageSquare size={13} />
-        {open ? `Hide ${total} ${total === 1 ? 'reply' : 'replies'}` : `${total} ${total === 1 ? 'reply' : 'replies'}`}
+        {open
+          ? `Hide ${total} ${total === 1 ? 'reply' : 'replies'}`
+          : `${total} ${total === 1 ? 'reply' : 'replies'}`}
       </button>
 
       {open && (
-        <div className="space-y-3 ml-2">
+        <div className="mt-3 space-y-4">
           {visible.map((res, i) => (
-            <ReplyRow key={res.txHash || i} res={res} chainId={chainId} />
+            <ReplyCard key={res.txHash || i} res={res} chainId={chainId} />
           ))}
-
           {hidden > 0 && (
             <button
               type="button"
