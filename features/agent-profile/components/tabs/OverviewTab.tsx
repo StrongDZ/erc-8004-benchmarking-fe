@@ -12,8 +12,9 @@ import { ensureHttpsUrl } from '@/shared/api/utils/format';
 import { useCopyToClipboard } from '@/shared/hooks/useCopyToClipboard';
 import { Badge } from '@/shared/ui/Badge';
 import { LinkOutbound } from '@/shared/ui/LinkOutbound';
+import { Button } from '@/shared/ui/Button';
 import { Skeleton } from '@/shared/ui/Skeleton';
-import { CheckCircle, XCircle, CircleHelp, Globe, AlertTriangle } from 'lucide-react';
+import { CheckCircle, XCircle, CircleHelp, Globe, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 
 interface Props { chainId: number; agentId: string; }
 
@@ -40,6 +41,68 @@ function HealthPill({ service }: { service: ServiceOverview }) {
         <Badge variant={cfg.variant} size="sm" title={title}>
             <cfg.Icon size={10} /> {cfg.label}
         </Badge>
+    );
+}
+
+const RECONNECT_COOLDOWN_SECONDS = 15;
+
+function ReconnectButton({
+    chainId,
+    agentId,
+    endpoint,
+    onResult,
+}: {
+    chainId: number;
+    agentId: string;
+    endpoint: string;
+    onResult: (svc: ServiceOverview) => void;
+}) {
+    const [status, setStatus] = useState<'idle' | 'loading' | 'cooldown'>('idle');
+    const [secondsLeft, setSecondsLeft] = useState(0);
+
+    useEffect(() => {
+        if (status !== 'cooldown') return;
+        if (secondsLeft <= 0) {
+            setStatus('idle');
+            return;
+        }
+        const timer = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
+        return () => clearTimeout(timer);
+    }, [status, secondsLeft]);
+
+    const handleClick = async () => {
+        setStatus('loading');
+        try {
+            const res = await api.reconnectServiceEndpoint(chainId, agentId, endpoint);
+            if (res.success && res.data) {
+                onResult(res.data);
+            }
+        } catch {
+            // Network error — fall through to cooldown so the click still registers.
+        } finally {
+            setSecondsLeft(RECONNECT_COOLDOWN_SECONDS);
+            setStatus('cooldown');
+        }
+    };
+
+    const disabled = status !== 'idle';
+
+    return (
+        <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleClick}
+            disabled={disabled}
+            className="shrink-0 text-xs"
+        >
+            {status === 'loading' ? (
+                <Loader2 size={12} className="animate-spin" />
+            ) : (
+                <RefreshCw size={12} />
+            )}
+            {status === 'cooldown' ? `Retry in ${secondsLeft}s` : 'Reconnect'}
+        </Button>
     );
 }
 
@@ -325,6 +388,24 @@ export default function OverviewTab({ chainId, agentId }: Props) {
                                         <span className="text-xs text-subtle">No endpoint declared</span>
                                     )}
                                 </div>
+                                {svc.endpoint && (
+                                    <ReconnectButton
+                                        chainId={chainId}
+                                        agentId={agentId}
+                                        endpoint={svc.endpoint}
+                                        onResult={(updated) => {
+                                            setData((prev) => {
+                                                if (!prev) return prev;
+                                                return {
+                                                    ...prev,
+                                                    services: prev.services.map((s) =>
+                                                        s.endpoint === updated.endpoint ? updated : s,
+                                                    ),
+                                                };
+                                            });
+                                        }}
+                                    />
+                                )}
                             </div>
                         ))}
                     </div>
