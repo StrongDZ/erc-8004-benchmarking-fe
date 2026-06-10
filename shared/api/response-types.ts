@@ -1,10 +1,13 @@
 import type { FeedbackClassification } from '@/shared/lib/feedbackClassification';
 
 export interface ScoreBreakdown {
-    reputation: number;  // raw accumulator (unbounded); UI clamps to [0,100] for composite contribution
-    services: number;    // [0, 100]
-    publisher: number;   // [0, 100]
-    compliance: number;  // [0, 100]
+    /** v2 reputation in [0, 100] = Quality·Confidence·Reliability·100 */
+    reputation: number;
+    /** Log-scaled distinct-client breadth in [0, 100] */
+    adoption: number;
+    services: number;
+    publisher: number;
+    compliance: number;
 }
 
 export interface ApiResponse<T> {
@@ -52,9 +55,11 @@ export interface LeaderboardAgent {
     trustScore: number;
     scoreBreakdown: ScoreBreakdown;
     reputationScore: number;
+    adoptionScore: number;
     scoreUpdateAt: number;
     consecutiveFails: number;
     totalTasks: number;
+    totalFeedbacks: number;
     totalPassed: number;
     totalFailed: number;
     successRate: number;
@@ -119,10 +124,12 @@ export interface AgentProfile {
         trustScore: number;
         scoreBreakdown: ScoreBreakdown;
         reputationScore: number;
+        adoptionScore: number;
         scoreUpdateAt: number;
         consecutiveFails: number;
         penalty: number;
         totalTasks: number;
+        totalFeedbacks: number;
         totalPassed: number;
         totalFailed: number;
         successRate: number;
@@ -214,7 +221,13 @@ export interface Feedback {
     /** Scale detected by the backend for this (tag1, tag2) pair: binary | star5 | star10 | pct100 | unbounded | "" */
     valueScale?: string;
     classification?: FeedbackClassification;
-    responses?: Array<{ responder: string; responseURI: string; txHash: string }>;
+    responses?: Array<{
+        responder: string;
+        responseURI?: string;
+        responseHash?: string;
+        txHash: string;
+        responseParsed?: any;
+    }>;
 }
 
 export interface Penalty {
@@ -318,8 +331,9 @@ export interface WalletProfile {
     address: string;
     chainId: number;
     kind: 'user' | 'owner';
-    trustScore: number;
-    trustScorePropagated: number;
+    /** null when the wallet exists but has not been rated yet */
+    trustScore: number | null;
+    trustScorePropagated?: number | null;
     feedbackTotalCount: number;
     feedbackValidCount: number;
     feedbackJunkCount: number;
