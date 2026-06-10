@@ -11,6 +11,7 @@ import {
 } from '@/shared/lib/feedbackClassification';
 import { Badge } from '@/shared/ui/Badge';
 import { FeedbackCategoryBadge, FeedbackValuePill, FeedbackContentCell } from '@/shared/ui/feedback';
+import { feedbackValueContainerClass } from '@/shared/lib/feedback/feedbackMetricTone';
 import { LinkOutbound } from '@/shared/ui/LinkOutbound';
 import { AgentAvatar } from '@/shared/ui/AgentAvatar';
 import { FeedbackReplies } from './FeedbackReplies';
@@ -112,23 +113,19 @@ export function FeedbackCard({ feedback: fb, chainId }: FeedbackCardProps) {
             )}
           </div>
 
-          {/* Via line — only rendered when endpoint or feedbackURI exists.
-               Endpoint is fixed w-[10rem] so feedbackURI always sits at the same position. */}
+          {/* Via line — only rendered when endpoint is present */}
           {hasVia && (
             <div className="flex items-center gap-2 mt-1">
               <span className="text-[11px] text-subtle/60 shrink-0">via</span>
-              {/* Fixed-width slot: endpoint or empty spacer to hold position */}
               <span className="w-[10rem] min-w-0 shrink-0">
-                {fb.endpoint?.trim() ? (
-                  <LinkOutbound
-                    href={ensureHttpsUrl(fb.endpoint)}
-                    external
-                    className="font-mono text-[11px] text-subtle hover:text-muted transition-colors w-full"
-                    title={fb.endpoint}
-                  >
-                    {fb.endpoint.replace(/^https?:\/\//, '')}
-                  </LinkOutbound>
-                ) : null}
+                <LinkOutbound
+                  href={ensureHttpsUrl(fb.endpoint!)}
+                  external
+                  className="font-mono text-[11px] text-subtle hover:text-muted transition-colors w-full"
+                  title={fb.endpoint}
+                >
+                  {fb.endpoint!.replace(/^https?:\/\//, '')}
+                </LinkOutbound>
               </span>
               {fb.feedbackURI && (
                 <LinkOutbound
@@ -144,8 +141,13 @@ export function FeedbackCard({ feedback: fb, chainId }: FeedbackCardProps) {
           )}
         </div>
 
-        {/* Right panel: bordered box wrapping tags + value together */}
-        <div className="shrink-0 ml-2 flex flex-col items-end gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 min-w-[6rem]">
+        {/* Right panel — same color hue as value pill, wraps tags + value */}
+        <div
+          className={[
+            'shrink-0 ml-2 flex flex-col items-end gap-1.5 rounded-lg border px-3 py-2 min-w-[6rem]',
+            feedbackValueContainerClass(fb, isRevoked),
+          ].join(' ')}
+        >
           {tagLabel && (
             <span
               className="font-mono text-[11px] text-subtle/80 max-w-[10rem] truncate text-right w-full"

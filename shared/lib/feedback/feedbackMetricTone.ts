@@ -37,54 +37,60 @@ function serviceFeedbackScore0to100ForBands(parsed: number, scale?: string): num
   }
 }
 
-/** Pill colors by score on 0–100: 0–39 red, 40–69 yellow, 70–84 blue, 85–100 green. */
-function serviceFeedbackScorePillClass(base: string, parsed: number, scale?: string): string {
-  const score = serviceFeedbackScore0to100ForBands(parsed, scale);
-  if (score < 40) {
-    return `${base} bg-rose-500/22 text-rose-100 border-rose-400/55`;
-  }
-  if (score < 70) {
-    return `${base} bg-amber-500/22 text-amber-100 border-amber-400/52`;
-  }
-  if (score < 85) {
-    return `${base} bg-sky-500/22 text-sky-100 border-sky-400/50`;
-  }
-  return `${base} bg-emerald-500/22 text-emerald-100 border-emerald-400/55`;
-}
+type ColorTone = 'revoked' | 'rose' | 'amber' | 'sky' | 'emerald' | 'violet';
 
-/** Colored pill for on-chain value ÷ 10^decimals (not VI). */
-export function feedbackValuePillClass(fb: FeedbackValueFields, revoked: boolean): string {
-  const base =
-    'inline-flex max-w-[14rem] shrink-0 items-center justify-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tabular-nums min-w-0';
-  if (revoked) {
-    return `${base} bg-white/10 text-subtle border-white/25`;
-  }
+function resolveValueColorTone(fb: FeedbackValueFields, revoked: boolean): ColorTone {
+  if (revoked) return 'revoked';
   const displayCategory = resolveFeedbackDisplayCategory(fb.classification);
   if (displayCategory === 'service_feedback') {
     const score = parseFeedbackScaledNumber(fb);
     if (score !== null) {
-      return serviceFeedbackScorePillClass(base, score, fb.valueScale);
+      const s = serviceFeedbackScore0to100ForBands(score, fb.valueScale);
+      if (s < 40)  return 'rose';
+      if (s < 70)  return 'amber';
+      if (s < 85)  return 'sky';
+      return 'emerald';
     }
   }
   const unit = resolveFeedbackUnit(fb);
   const raw = (fb.value ?? '').trim().toLowerCase();
   if (unit === 'bool') {
     const isTrue = raw === '1' || raw === 'true' || (() => {
-      try {
-        return BigInt(fb.value ?? '0') === BigInt(1);
-      } catch {
-        return false;
-      }
+      try { return BigInt(fb.value ?? '0') === BigInt(1); } catch { return false; }
     })();
-    return isTrue
-      ? `${base} bg-emerald-500/22 text-emerald-100 border-emerald-400/55`
-      : `${base} bg-rose-500/22 text-rose-100 border-rose-400/55`;
+    return isTrue ? 'emerald' : 'rose';
   }
-  if (unit === '%' || fb.tag1 === 'uptime' || fb.tag1 === 'successRate') {
-    return `${base} bg-amber-500/22 text-amber-100 border-amber-400/52`;
-  }
-  if (unit === 'ms' || unit === 's' || unit === 'blocks' || unit === 'tok/s') {
-    return `${base} bg-sky-500/22 text-sky-100 border-sky-400/50`;
-  }
-  return `${base} bg-violet-500/20 text-violet-100 border-violet-400/50`;
+  if (unit === '%' || fb.tag1 === 'uptime' || fb.tag1 === 'successRate') return 'amber';
+  if (unit === 'ms' || unit === 's' || unit === 'blocks' || unit === 'tok/s') return 'sky';
+  return 'violet';
+}
+
+const PILL_COLORS: Record<ColorTone, string> = {
+  revoked:  'bg-white/10 text-subtle border-white/25',
+  rose:     'bg-rose-500/22 text-rose-100 border-rose-400/55',
+  amber:    'bg-amber-500/22 text-amber-100 border-amber-400/52',
+  sky:      'bg-sky-500/22 text-sky-100 border-sky-400/50',
+  emerald:  'bg-emerald-500/22 text-emerald-100 border-emerald-400/55',
+  violet:   'bg-violet-500/20 text-violet-100 border-violet-400/50',
+};
+
+const CONTAINER_COLORS: Record<ColorTone, string> = {
+  revoked:  'bg-white/[0.03] border-white/12',
+  rose:     'bg-rose-500/[0.08] border-rose-400/25',
+  amber:    'bg-amber-500/[0.08] border-amber-400/25',
+  sky:      'bg-sky-500/[0.08] border-sky-400/25',
+  emerald:  'bg-emerald-500/[0.08] border-emerald-400/25',
+  violet:   'bg-violet-500/[0.07] border-violet-400/25',
+};
+
+/** Colored pill for on-chain value ÷ 10^decimals (not VI). */
+export function feedbackValuePillClass(fb: FeedbackValueFields, revoked: boolean): string {
+  const base =
+    'inline-flex max-w-[14rem] shrink-0 items-center justify-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tabular-nums min-w-0';
+  return `${base} ${PILL_COLORS[resolveValueColorTone(fb, revoked)]}`;
+}
+
+/** Border + background for a container whose color matches the value pill hue (more subtle). */
+export function feedbackValueContainerClass(fb: FeedbackValueFields, revoked: boolean): string {
+  return CONTAINER_COLORS[resolveValueColorTone(fb, revoked)];
 }
