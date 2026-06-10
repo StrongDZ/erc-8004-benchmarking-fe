@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
 import Link from 'next/link';
-import { truncateAddress } from '@/shared/api/client';
+import { truncateAddress, explorerUrl, resolveIPFS } from '@/shared/api/client';
+import { ensureHttpsUrl } from '@/shared/api/utils/format';
 import { feedbackEventTimeMs } from '@/shared/lib/feedbackTimestamp';
 import {
   feedbackClassificationTitle,
@@ -11,7 +12,7 @@ import {
 } from '@/shared/lib/feedbackClassification';
 import { Badge } from '@/shared/ui/Badge';
 import { FeedbackCategoryBadge, FeedbackValuePill, FeedbackContentCell } from '@/shared/ui/feedback';
-import { FeedbackMetaRow } from '@/shared/ui/feedback/FeedbackMetaRow';
+import { LinkOutbound } from '@/shared/ui/LinkOutbound';
 import { FeedbackReplies } from './FeedbackReplies';
 import type { Feedback } from '@/shared/api/types';
 
@@ -44,7 +45,9 @@ export function FeedbackCard({ feedback: fb, chainId }: FeedbackCardProps) {
   const hasContent = comment.trim().length > 0 || attachments.length > 0;
   const isLong = comment.length > 240;
 
-  const hasMeta = !!(fb.tag1?.trim() || fb.tag2?.trim() || fb.endpoint?.trim() || fb.txHash || fb.feedbackURI);
+  // Only show Details drawer when there's genuinely interesting collapsible content.
+  // txHash is always present but shown inline in the footer — not a drawer trigger.
+  const hasMeta = !!(fb.tag1?.trim() || fb.tag2?.trim() || fb.endpoint?.trim() || fb.feedbackURI);
 
   return (
     <div
@@ -118,7 +121,7 @@ export function FeedbackCard({ feedback: fb, chainId }: FeedbackCardProps) {
         </div>
       )}
 
-      {/* ── Meta drawer ── */}
+      {/* ── Meta drawer — tags / endpoint / URI (no date — already in header) ── */}
       {hasMeta && (
         <div className="mt-3">
           <button
@@ -135,12 +138,12 @@ export function FeedbackCard({ feedback: fb, chainId }: FeedbackCardProps) {
               metaOpen ? 'grid-rows-[1fr] mt-2' : 'grid-rows-[0fr]',
             ].join(' ')}
           >
-            <div className="overflow-hidden">
+            <div className="overflow-hidden space-y-2">
               {(fb.tag1?.trim() || fb.tag2?.trim()) && (
-                <div className="flex flex-wrap gap-1.5 mb-2">
+                <div className="flex flex-wrap gap-1.5">
                   {fb.tag1?.trim() && (
                     <span
-                      className="font-mono text-[11px] text-subtle bg-white/5 px-2 py-0.5 rounded max-w-[16rem] truncate"
+                      className="font-mono text-[11px] text-subtle bg-white/5 px-2 py-0.5 rounded max-w-[20rem] truncate"
                       title={fb.tag1}
                     >
                       {fb.tag1}
@@ -148,7 +151,7 @@ export function FeedbackCard({ feedback: fb, chainId }: FeedbackCardProps) {
                   )}
                   {fb.tag2?.trim() && (
                     <span
-                      className="font-mono text-[11px] text-subtle bg-white/5 px-2 py-0.5 rounded max-w-[16rem] truncate"
+                      className="font-mono text-[11px] text-subtle bg-white/5 px-2 py-0.5 rounded max-w-[20rem] truncate"
                       title={fb.tag2}
                     >
                       {fb.tag2}
@@ -156,18 +159,55 @@ export function FeedbackCard({ feedback: fb, chainId }: FeedbackCardProps) {
                   )}
                 </div>
               )}
-              <FeedbackMetaRow
-                variant="agent"
-                chainId={chainId}
-                timestamp={fb.timestamp}
-                timestampUnix={fb.timestampUnix}
-                txHash={fb.txHash}
-                endpoint={fb.endpoint}
-                feedbackURI={fb.feedbackURI}
-                revokeTxHash={fb.revokeTxHash}
-              />
+              {fb.endpoint?.trim() && (
+                <LinkOutbound
+                  href={ensureHttpsUrl(fb.endpoint)}
+                  external
+                  className="inline-flex font-mono text-[11px] text-muted hover:text-primary transition-colors max-w-full"
+                  title={fb.endpoint}
+                >
+                  {fb.endpoint.replace(/^https?:\/\//, '')}
+                </LinkOutbound>
+              )}
+              {fb.feedbackURI && (
+                <LinkOutbound
+                  href={resolveIPFS(fb.feedbackURI)}
+                  external
+                  className="inline-flex text-[11px] text-muted hover:text-accent transition-colors"
+                  title={fb.feedbackURI}
+                >
+                  Feedback URI
+                </LinkOutbound>
+              )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── Footer: always-visible txHash + optional revoke link ── */}
+      {(fb.txHash || fb.revokeTxHash) && (
+        <div className="mt-3 flex items-center gap-3 flex-wrap">
+          {fb.txHash && (
+            <LinkOutbound
+              href={explorerUrl(chainId, fb.txHash)}
+              external
+              className="font-mono text-[11px] text-subtle hover:text-muted transition-colors"
+              title={fb.txHash}
+            >
+              {fb.txHash.slice(0, 8)}…{fb.txHash.slice(-6)}
+            </LinkOutbound>
+          )}
+          {fb.revokeTxHash && (
+            <LinkOutbound
+              href={explorerUrl(chainId, fb.revokeTxHash)}
+              external
+              className="inline-flex items-center gap-1 text-[11px] text-danger/70 hover:text-danger transition-colors"
+              title={`Revoke tx: ${fb.revokeTxHash}`}
+            >
+              <RotateCcw size={11} />
+              revoke tx
+            </LinkOutbound>
+          )}
         </div>
       )}
 
