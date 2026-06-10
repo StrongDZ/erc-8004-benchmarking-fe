@@ -10,6 +10,7 @@ import type {
     Penalty,
     ProofData,
     RadarData,
+    ServiceOverview,
     TrustScorePoint,
 } from '@/shared/api/types';
 
@@ -53,4 +54,10 @@ export const agentsApi = {
 
     agentRegistrations: (chainId: number, agentId: string) =>
         apiFetch<AgentRegistrationList>(`/agents/${chainId}/${agentId}/registrations`),
+
+    reconnectServiceEndpoint: (chainId: number, agentId: string, endpoint: string) =>
+        apiFetch<ServiceOverview>(`/agents/${chainId}/${agentId}/services/reconnect`, {
+            method: 'POST',
+            body: JSON.stringify({ endpoint }),
+        }),
 };
