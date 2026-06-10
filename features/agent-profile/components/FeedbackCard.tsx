@@ -144,11 +144,11 @@ export function FeedbackCard({ feedback: fb, chainId }: FeedbackCardProps) {
           )}
         </div>
 
-        {/* Right panel: tags + value */}
-        <div className="shrink-0 flex flex-col items-end gap-1 ml-2">
+        {/* Right panel: bordered box wrapping tags + value together */}
+        <div className="shrink-0 ml-2 flex flex-col items-end gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 min-w-[6rem]">
           {tagLabel && (
             <span
-              className="font-mono text-[11px] text-subtle bg-white/5 px-2 py-0.5 rounded max-w-[11rem] truncate text-right"
+              className="font-mono text-[11px] text-subtle/80 max-w-[10rem] truncate text-right w-full"
               title={tagLabel}
             >
               {tagLabel}
