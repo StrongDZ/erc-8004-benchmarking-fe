@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Search, Activity, Shield, BarChart3, Zap } from "lucide-react";
+import { Search, Activity, Shield, BarChart3, Zap, TrendingUp, Wallet, FlaskConical } from "lucide-react";
 import { useChain } from "@/providers/ChainProvider";
 import { useSocket } from "@/providers/SocketProvider";
 import { api } from "@/shared/api/client";
@@ -87,6 +87,15 @@ export default function Navbar() {
                     </Link>
                     <Link href="/indexer" className="flex items-center gap-2 text-muted hover:text-white transition-colors">
                         <Activity size={15} /> Indexer
+                    </Link>
+                    <Link href="/leaderboard/rising-stars" className="flex items-center gap-2 text-muted hover:text-white transition-colors">
+                        <TrendingUp size={15} /> Rising Stars
+                    </Link>
+                    <Link href="/leaderboard/wallet-ranking" className="flex items-center gap-2 text-muted hover:text-white transition-colors">
+                        <Wallet size={15} /> Wallet Ranking
+                    </Link>
+                    <Link href="/admin" className="flex items-center gap-2 text-muted hover:text-white transition-colors">
+                        <FlaskConical size={15} /> Admin
                     </Link>
                 </div>
             </div>

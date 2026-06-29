@@ -1,16 +1,16 @@
 'use client';
 
-import Link from 'next/link';
 import { FileText, RotateCcw } from 'lucide-react';
-import { explorerUrl, resolveIPFS, truncateAddress } from '@/shared/api/client';
+import { explorerUrl, resolveIPFS } from '@/shared/api/client';
 import { feedbackEventTimeMs } from '@/shared/lib/feedbackTimestamp';
 import { LinkOutbound } from '@/shared/ui/LinkOutbound';
+import { AddressLabel } from '@/shared/ui/AddressLabel';
 
 const ICON = 16;
 const DOT = 'text-muted/80';
 
 const endpointPillClass =
-  'inline-flex items-center rounded-lg px-2.5 py-1 text-[12px] font-mono bg-primary/15 text-primary border border-primary/35 max-w-full sm:max-w-[min(100%,280px)] truncate';
+  'inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-mono bg-primary/15 text-primary border border-primary/35 max-w-full sm:max-w-[min(100%,280px)] truncate';
 
 export type FeedbackMetaVariant = 'wallet' | 'agent';
 
@@ -51,13 +51,11 @@ export function FeedbackMetaRow({
     <div className={metaClassName}>
       {variant === 'agent' && clientAddress && (
         <>
-          <Link
-            href={`/wallet/${clientAddress}`}
+          <AddressLabel
+            address={clientAddress}
+            avatarSize={14}
             className="font-mono text-muted hover:text-primary transition-colors"
-            title={clientAddress}
-          >
-            {truncateAddress(clientAddress)}
-          </Link>
+          />
           <span className={DOT}>·</span>
         </>
       )}
@@ -75,7 +73,7 @@ export function FeedbackMetaRow({
           <LinkOutbound
             href={explorerUrl(chainId, txHash)}
             external
-            className="min-w-0 max-w-full font-mono text-[13px] text-muted hover:text-primary transition-colors"
+            className="min-w-0 max-w-full font-mono text-xs text-muted hover:text-primary transition-colors"
             title="View transaction"
           >
             {txHash.slice(0, 6)}…{txHash.slice(-4)}

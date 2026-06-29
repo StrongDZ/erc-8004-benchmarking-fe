@@ -107,7 +107,7 @@ export default function OwnedAgentsSection({ agents, chains = [], loading, walle
                                                         >
                                                             {a.name || `Agent #${a.agentId}`}
                                                         </p>
-                                                        <p className="truncate text-[11px] text-subtle">#{a.agentId}</p>
+                                                        <p className="truncate text-2xs text-subtle">#{a.agentId}</p>
                                                     </div>
                                                 </Link>
                                             </td>
@@ -123,11 +123,11 @@ export default function OwnedAgentsSection({ agents, chains = [], loading, walle
                                             </td>
                                             <td className="px-4 py-2.5 text-right align-middle tabular-nums">
                                                 <span className="font-bold text-primary">
-                                                    {a.trustScore.toFixed(1)}<span className="text-[10px] font-normal text-muted ml-0.5">/100</span>
+                                                    {a.trustScore.toFixed(1)}<span className="text-3xs font-normal text-muted ml-0.5">/100</span>
                                                 </span>
                                             </td>
                                             <td className="px-4 py-2.5 text-right align-middle tabular-nums text-white">
-                                                {a.totalTasks.toLocaleString()}
+                                                {a.totalFeedbacks.toLocaleString()}
                                             </td>
                                             <td className="px-4 py-2.5 text-center align-middle">
                                                 <Badge variant={a.active ? 'success' : 'danger'} size="xs">

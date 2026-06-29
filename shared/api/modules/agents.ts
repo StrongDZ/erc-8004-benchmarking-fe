@@ -4,6 +4,7 @@ import type {
     AgentProfile,
     AgentRegistrationList,
     Feedback,
+    FeedbackClient,
     HeatmapDay,
     IdentityEvent,
     LeaderboardAgent,
@@ -34,6 +35,11 @@ export const agentsApi = {
         const q = new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)]));
         return apiFetch<Feedback[]>(`/agents/${chainId}/${agentId}/feedbacks?${q}`);
     },
+
+    feedbackClients: (chainId: number, agentId: string, page = 1, limit = 20) =>
+        apiFetch<FeedbackClient[]>(
+            `/agents/${chainId}/${agentId}/feedback-clients?page=${page}&limit=${limit}`,
+        ),
 
     feedbackDetail: (chainId: number, agentId: string, feedbackId: string) =>
         apiFetch<Feedback & { offchainContent?: unknown; offchainParsed?: unknown }>(

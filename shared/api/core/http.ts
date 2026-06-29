@@ -8,14 +8,15 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<Api
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
     };
+    // Env key is applied first so caller-supplied headers can override it.
+    if (path.startsWith('/admin/') && ADMIN_API_KEY) {
+        headers['X-API-Key'] = ADMIN_API_KEY;
+    }
     if (init?.headers) {
         const extraHeaders = new Headers(init.headers);
         extraHeaders.forEach((value, key) => {
             headers[key] = value;
         });
-    }
-    if (path.startsWith('/admin/') && ADMIN_API_KEY) {
-        headers['X-API-Key'] = ADMIN_API_KEY;
     }
     const res = await fetch(`${API_BASE}${path}`, {
         headers,

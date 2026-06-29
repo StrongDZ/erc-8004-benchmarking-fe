@@ -42,7 +42,7 @@ type ColorTone = 'revoked' | 'rose' | 'amber' | 'sky' | 'emerald' | 'violet';
 function resolveValueColorTone(fb: FeedbackValueFields, revoked: boolean): ColorTone {
   if (revoked) return 'revoked';
   const displayCategory = resolveFeedbackDisplayCategory(fb.classification);
-  if (displayCategory === 'service_feedback') {
+  if (displayCategory === 'quality' || displayCategory === 'service_feedback') {
     const score = parseFeedbackScaledNumber(fb);
     if (score !== null) {
       const s = serviceFeedbackScore0to100ForBands(score, fb.valueScale);
@@ -86,11 +86,25 @@ const CONTAINER_COLORS: Record<ColorTone, string> = {
 /** Colored pill for on-chain value ÷ 10^decimals (not VI). */
 export function feedbackValuePillClass(fb: FeedbackValueFields, revoked: boolean): string {
   const base =
-    'inline-flex max-w-[14rem] shrink-0 items-center justify-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tabular-nums min-w-0';
+    'inline-flex max-w-[14rem] shrink-0 items-center justify-center rounded-full border px-2.5 py-0.5 text-2xs font-semibold tabular-nums min-w-0';
   return `${base} ${PILL_COLORS[resolveValueColorTone(fb, revoked)]}`;
 }
 
 /** Border + background for a container whose color matches the value pill hue (more subtle). */
 export function feedbackValueContainerClass(fb: FeedbackValueFields, revoked: boolean): string {
   return CONTAINER_COLORS[resolveValueColorTone(fb, revoked)];
+}
+
+const VALUE_TEXT_COLORS: Record<ColorTone, string> = {
+  revoked:  'text-subtle',
+  rose:     'text-rose-100',
+  amber:    'text-amber-100',
+  sky:      'text-sky-100',
+  emerald:  'text-emerald-100',
+  violet:   'text-violet-100',
+};
+
+/** Text color matching the value tone (for large score display inside a tinted container). */
+export function feedbackValueTextClass(fb: FeedbackValueFields, revoked: boolean): string {
+  return VALUE_TEXT_COLORS[resolveValueColorTone(fb, revoked)];
 }

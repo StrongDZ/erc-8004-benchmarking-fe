@@ -1,9 +1,9 @@
 'use client';
-import Link from 'next/link';
-import { AgentProfile, formatScore, truncateAddress } from '@/shared/api/client';
+import { AgentProfile, formatScore } from '@/shared/api/client';
 import { AgentAvatar } from '@/shared/ui/AgentAvatar';
-import { CheckCircle, XCircle, Shield, Zap } from 'lucide-react';
+import { CheckCircle, XCircle, Shield, Zap, TrendingDown } from 'lucide-react';
 import { LinkOutbound } from '@/shared/ui/LinkOutbound';
+import { AddressLabel } from '@/shared/ui/AddressLabel';
 import { Badge } from '@/shared/ui/Badge';
 import { RegistrationBadge } from './RegistrationBadge';
 
@@ -48,16 +48,17 @@ export default function AgentHero({ profile, chainId }: Props) {
             {profile.x402Support && <Badge variant="accent" size="sm"><Zap size={10} /> x402</Badge>}
             {profile.supportedTrust?.map(t => <Badge key={t} variant="muted" size="sm">{t}</Badge>)}
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted min-w-0">
-            <Shield size={13} color="var(--color-text-subtle)" className="shrink-0" />
-            <Link
-              href={`/wallet/${profile.owner}`}
-              className="inline-flex min-w-0 max-w-full items-center gap-1 font-mono text-xs text-muted hover:text-primary transition-colors truncate"
-              title={profile.owner}
-            >
-              {truncateAddress(profile.owner, 10)}
-            </Link>
-          </div>
+          {profile.owner && (
+            <div className="flex items-center gap-2 text-sm text-muted min-w-0">
+              <Shield size={13} color="var(--color-text-subtle)" className="shrink-0" />
+              <AddressLabel
+                address={profile.owner}
+                chars={10}
+                avatarSize={14}
+                className="min-w-0 max-w-full font-mono text-xs text-muted hover:text-primary transition-colors truncate"
+              />
+            </div>
+          )}
           {profile.description && (
             <p className="text-muted text-sm leading-relaxed">{profile.description}</p>
           )}
@@ -93,6 +94,11 @@ export default function AgentHero({ profile, chainId }: Props) {
           <div className="score-bar-wrap w-full mt-3">
             <div className="score-bar-fill gold" style={{ width: `${Math.min(100, s.trustScore)}%` }} />
           </div>
+          {s.penalty > 0 && (
+            <span className="mt-3 inline-flex items-center gap-1 rounded-full border border-danger/40 bg-danger/15 px-2.5 py-1 text-2xs font-semibold text-danger">
+              <TrendingDown size={11} /> -{s.penalty.toFixed(1)}% reliability penalty
+            </span>
+          )}
         </div>
 
       </div>

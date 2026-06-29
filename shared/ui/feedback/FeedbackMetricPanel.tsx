@@ -18,7 +18,7 @@ export function FeedbackMetricPanel({ vi, revoked, metricLabel, valueDisplay }: 
       )}`}
     >
       <span
-        className="block truncate text-[10px] font-semibold uppercase tracking-wide opacity-90 mb-1 leading-snug text-inherit"
+        className="block truncate text-3xs font-semibold uppercase tracking-wide opacity-90 mb-1 leading-snug text-inherit"
         title={metricLabel}
       >
         {metricLabel}

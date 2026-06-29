@@ -2,6 +2,8 @@ export { feedbackMetricPanelClass, feedbackValuePillClass } from '@/shared/lib/f
 export { LinkOutbound } from '@/shared/ui/LinkOutbound';
 export { FeedbackCategoryBadge } from '@/shared/ui/feedback/FeedbackCategoryBadge';
 export type { FeedbackCategoryBadgeProps } from '@/shared/ui/feedback/FeedbackCategoryBadge';
+export { FeedbackFeatureBadge } from '@/shared/ui/feedback/FeedbackFeatureBadge';
+export type { FeedbackFeatureBadgeProps } from '@/shared/ui/feedback/FeedbackFeatureBadge';
 export { FeedbackValuePill } from '@/shared/ui/feedback/FeedbackValuePill';
 export type { FeedbackValuePillProps } from '@/shared/ui/feedback/FeedbackValuePill';
 export { FeedbackMetaRow } from '@/shared/ui/feedback/FeedbackMetaRow';

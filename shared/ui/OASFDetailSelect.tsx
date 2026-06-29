@@ -195,13 +195,13 @@ export function OASFDetailSelect({ label, placeholder = "Any", entries, counts, 
                                     >
                                         <div className="flex-1 min-w-0">
                                             <div
-                                                className={`truncate ${isRoot ? "text-[15px] font-bold" : "text-sm font-semibold"} ${
+                                                className={`truncate ${isRoot ? "text-sm font-bold" : "text-sm font-semibold"} ${
                                                     isSelected ? "text-primary" : isRoot ? "text-white" : "text-white/90"
                                                 }`}
                                             >
                                                 {e.caption}
                                             </div>
-                                            <div className="text-[12px] text-subtle mt-0.5 truncate font-mono">{e.key}</div>
+                                            <div className="text-xs text-subtle mt-0.5 truncate font-mono">{e.key}</div>
                                             {e.description && (
                                                 <div className="text-xs text-muted mt-0.5 line-clamp-2 leading-relaxed">{e.description}</div>
                                             )}

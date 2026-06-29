@@ -2,10 +2,9 @@
 
 import { useState } from 'react';
 import { MessageSquare } from 'lucide-react';
-import Link from 'next/link';
-import { truncateAddress, explorerUrl, resolveIPFS } from '@/shared/api/client';
+import { explorerUrl, resolveIPFS } from '@/shared/api/client';
 import { LinkOutbound } from '@/shared/ui/LinkOutbound';
-import { AgentAvatar } from '@/shared/ui/AgentAvatar';
+import { AddressLabel } from '@/shared/ui/AddressLabel';
 import { FeedbackContentCell } from '@/shared/ui/feedback';
 import type { Feedback } from '@/shared/api/types';
 
@@ -32,23 +31,20 @@ function ReplyCard({ res, chainId }: { res: Response; chainId: number }) {
     <div className="relative pl-4 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[2px] before:rounded-full before:bg-purple-900/50">
       {/* Mini header: avatar + address + txHash */}
       <div className="flex items-start gap-2">
-        <AgentAvatar seed={res.responder} size={24} className="mt-0.5 shrink-0" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-            <Link
-              href={`/wallet/${res.responder}`}
+            <AddressLabel
+              address={res.responder}
+              avatarSize={24}
               className="font-mono text-xs text-white hover:text-primary transition-colors truncate"
-              title={res.responder}
-            >
-              {truncateAddress(res.responder)}
-            </Link>
+            />
           </div>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
             {res.txHash && (
               <LinkOutbound
                 href={explorerUrl(chainId, res.txHash)}
                 external
-                className="font-mono text-[11px] text-subtle hover:text-muted transition-colors"
+                className="font-mono text-2xs text-subtle hover:text-muted transition-colors"
                 title={res.txHash}
               >
                 {res.txHash.slice(0, 8)}…{res.txHash.slice(-6)}
@@ -56,11 +52,11 @@ function ReplyCard({ res, chainId }: { res: Response; chainId: number }) {
             )}
             {res.responseURI && (
               <>
-                <span className="text-subtle/50 text-[11px]">·</span>
+                <span className="text-subtle/50 text-2xs">·</span>
                 <LinkOutbound
                   href={resolveIPFS(res.responseURI)}
                   external
-                  className="text-[11px] text-subtle hover:text-accent transition-colors"
+                  className="text-2xs text-subtle hover:text-accent transition-colors"
                   title={res.responseURI}
                 >
                   URI
@@ -88,7 +84,7 @@ function ReplyCard({ res, chainId }: { res: Response; chainId: number }) {
                 <button
                   type="button"
                   onClick={() => setExpanded((v) => !v)}
-                  className="text-[11px] text-purple-400 hover:text-purple-300 transition-colors mt-0.5"
+                  className="text-2xs text-purple-400 hover:text-purple-300 transition-colors mt-0.5"
                 >
                   {expanded ? 'Show less' : 'Show more'}
                 </button>

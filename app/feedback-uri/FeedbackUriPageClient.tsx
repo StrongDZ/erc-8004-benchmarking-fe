@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { Copy } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ArrowLeft, Copy } from 'lucide-react';
 import { api, resolveIPFS } from '@/shared/api/client';
 import type { OffchainByUriData } from '@/shared/api/types';
 import { LinkOutbound } from '@/shared/ui/LinkOutbound';
@@ -29,6 +29,20 @@ function formatParsedJson(v: unknown): string {
   } catch {
     return String(v);
   }
+}
+
+function BackToPreviousPage() {
+  const router = useRouter();
+  return (
+    <button
+      type="button"
+      onClick={() => router.back()}
+      className="mb-4 inline-flex items-center gap-2 text-sm text-muted transition-colors hover:text-primary"
+    >
+      <ArrowLeft size={16} aria-hidden />
+      Return to previous page
+    </button>
+  );
 }
 
 export function FeedbackUriPageClient() {
@@ -94,6 +108,7 @@ export function FeedbackUriPageClient() {
   if (!raw) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10">
+        <BackToPreviousPage />
         <div className="card p-6 text-center text-muted text-sm">
           No feedback URI provided. Add a <code className="font-mono text-xs">uri</code> query parameter.
         </div>
@@ -103,6 +118,7 @@ export function FeedbackUriPageClient() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
+      <BackToPreviousPage />
       <div className="card p-6 space-y-6">
         <div>
           <h1 className="font-heading text-xl text-white mb-1">Feedback URI</h1>

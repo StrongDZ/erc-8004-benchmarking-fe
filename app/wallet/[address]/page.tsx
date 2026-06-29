@@ -15,6 +15,7 @@ export default function WalletPage({ params }: { params: { address: string } }) 
     const [ownedAgents, setOwnedAgents] = useState<LeaderboardAgent[]>([]);
     const [ownedLoading, setOwnedLoading] = useState(true);
     const [feedbackTotal, setFeedbackTotal] = useState(0);
+    const [interactedTotal, setInteractedTotal] = useState(0);
     const [walletProfile, setWalletProfile] = useState<WalletProfile | null>(null);
 
     useEffect(() => {
@@ -30,7 +31,17 @@ export default function WalletPage({ params }: { params: { address: string } }) 
 
     useEffect(() => {
         api.walletProfile(address)
-            .then(r => { if (r.success) setWalletProfile(r.data ?? null); })
+            .then(r => {
+                if (r.success) setWalletProfile(r.data ?? null);
+            })
+            .catch(() => {});
+    }, [address]);
+
+    useEffect(() => {
+        api.feedbackAgents(address, 1, 1)
+            .then(r => {
+                if (r.success) setInteractedTotal(r.meta?.total ?? 0);
+            })
             .catch(() => {});
     }, [address]);
 
@@ -61,9 +72,12 @@ export default function WalletPage({ params }: { params: { address: string } }) 
                     ownedCount={ownedAgents.length}
                     ownedLoading={ownedLoading}
                     feedbackCount={feedbackTotal}
-                    interactedCount={0}
+                    interactedCount={interactedTotal}
                     trustScore={walletProfile?.trustScore}
-                    trustScorePropagated={walletProfile?.trustScorePropagated}
+                    externalScore={walletProfile?.externalScore}
+                    kind={walletProfile?.kind}
+                    feedbackValidCount={walletProfile?.feedbackValidCount}
+                    feedbackJunkCount={walletProfile?.feedbackJunkCount}
                 />
                 <OwnedAgentsSection
                     agents={ownedAgents}

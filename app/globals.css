@@ -9,11 +9,13 @@
   --color-bg: #000000;
   --color-bg-card: #09090B;
   --color-bg-card-hover: #18181B;
-  --color-bg-elevated: #09090B;
+  /* Floating/inset chrome (popovers, table headers, inputs) — a subtle step above card */
+  --color-bg-elevated: #121214;
   --color-border: #27272A;
   --color-border-subtle: #18181B;
 
   --color-primary: #F59E0B;
+  --color-primary-hover: #FBBF24;
   --color-primary-dim: rgba(245, 158, 11, 0.15);
   --color-primary-glow: rgba(245, 158, 11, 0.4);
 

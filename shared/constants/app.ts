@@ -9,6 +9,10 @@ export const FALLBACK_AVATAR_DATA_URI =
 
 export const INDEXER_STATUS_POLL_INTERVAL_MS = 30_000;
 
+// Reserved sandbox chain for the scoring simulator — never appears in the
+// contracts collection so it cannot contaminate live chain crawl cursors.
+export const SANDBOX_CHAIN_ID = 999999001;
+
 export const DEFAULT_FEEDBACK_PAGE_SIZE = 10;
 export const RISING_STAR_PERIODS = ['24h', '7d', '30d'] as const;
 

@@ -102,7 +102,7 @@ export default function NewAgentsStrip({ chainIds, limit = 8 }: Props) {
                                 <div className="flex items-center gap-1.5">
                                     {a.hasOASF && <Badge variant="success" size="xs">OASF</Badge>}
                                     {a.x402Support && <Badge variant="primary" size="xs">x402</Badge>}
-                                    {!a.hasOASF && !a.x402Support && <span className="text-[10px] text-subtle">—</span>}
+                                    {!a.hasOASF && !a.x402Support && <span className="text-3xs text-subtle">—</span>}
                                 </div>
                                 <span className="text-xs text-subtle">{relativeTime(a.createdAt)}</span>
                             </div>

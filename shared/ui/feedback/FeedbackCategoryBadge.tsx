@@ -1,5 +1,6 @@
 'use client';
 
+import { feedbackCategoryDisplayLabel } from '@/shared/lib/feedback/feedbackCategories';
 import { Badge, type BadgeProps, type BadgeSize } from '@/shared/ui/Badge';
 
 export interface FeedbackCategoryBadgeProps {
@@ -12,19 +13,30 @@ type BadgeVariant = BadgeProps['variant'];
 
 function categoryVariant(cat: string): BadgeVariant {
   switch (cat) {
-    case 'service_feedback': return 'accent';
-    case 'config_feedback':  return 'warning';
-    case 'junk':             return 'danger';
-    case 'app_specific':     return 'primary';
-    default:                 return 'muted';
+    case 'quality':
+    case 'service_feedback': // legacy rows
+    case 'config_feedback':
+      return 'accent';
+    case 'quantity':
+    case 'app_specific':
+      return 'primary';
+    case 'junk':
+    case 'spam':
+    case 'noise':
+      return 'danger';
+    case 'others':
+      return 'muted';
+    default:
+      return 'muted';
   }
 }
 
 export function FeedbackCategoryBadge({ category, badgeSize = 'sm', title }: FeedbackCategoryBadgeProps) {
-  const c = category?.trim();
-  const label = c && c.length > 0 ? c : 'unknown';
+  const raw = category?.trim();
+  const label = raw && raw.length > 0 ? feedbackCategoryDisplayLabel(raw) : 'unknown';
+  const variantKey = raw && raw.length > 0 ? raw : 'unknown';
   return (
-    <Badge variant={categoryVariant(label)} size={badgeSize} title={title}>
+    <Badge variant={categoryVariant(variantKey)} size={badgeSize} title={title}>
       {label}
     </Badge>
   );

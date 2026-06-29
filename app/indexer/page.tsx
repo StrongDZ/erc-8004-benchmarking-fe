@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useMemo } from "react";
-import { Search, Cpu, Server, MessageSquare } from "lucide-react";
+import { Search, Cpu, Server, Activity } from "lucide-react";
 import { api } from "@/shared/api/client";
 import type { IndexerChainStatusView } from "@/shared/api/client";
 import { useSocketEvent } from "@/shared/hooks/useSocketEvent";
@@ -11,6 +11,7 @@ import { chainDisplayMeta } from "@/shared/api/utils/chains";
 
 export default function IndexerPage() {
     const [statuses, setStatuses] = useState<IndexerChainStatusView[]>([]);
+    const [throughput, setThroughput] = useState<{ events24h: number; feedbacks24h: number }>({ events24h: 0, feedbacks24h: 0 });
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     // Per-chainId live block from WebSocket
@@ -34,6 +35,7 @@ export default function IndexerPage() {
                 });
                 normalized.sort((a, b) => a.chainId - b.chainId);
                 setStatuses(normalized);
+                setThroughput({ events24h: res.data.events24h ?? 0, feedbacks24h: res.data.feedbacks24h ?? 0 });
             } else {
                 setStatuses([]);
             }
@@ -111,13 +113,13 @@ export default function IndexerPage() {
                 </div>
                 <div className="card flex items-center gap-4 px-5 py-4">
                     <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-success/10 border border-success/20">
-                        <MessageSquare size={16} className="text-success" />
+                        <Activity size={16} className="text-success" />
                     </div>
                     <div>
-                        <div className="text-2xl font-bold font-heading text-white">
-                            {totalFeedbacks.toLocaleString()}
+                        <div className="text-2xl font-bold font-heading text-white tabular-nums">
+                            {throughput.events24h.toLocaleString()}
                         </div>
-                        <div className="text-xs uppercase tracking-widest text-subtle">Total feedbacks</div>
+                        <div className="text-xs uppercase tracking-widest text-subtle">events · 24h ({throughput.feedbacks24h.toLocaleString()} feedbacks)</div>
                     </div>
                 </div>
             </div>

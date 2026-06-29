@@ -24,11 +24,11 @@ function CopyField({ label, value }: { label: string; value?: string }) {
 
     return (
         <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] uppercase tracking-widest text-subtle font-semibold">{label}</span>
+            <span className="text-3xs uppercase tracking-widest text-subtle font-semibold">{label}</span>
             <button
                 onClick={copy}
                 title={value}
-                className="flex items-center gap-1.5 text-[12px] font-mono text-muted hover:text-white transition-colors group w-fit"
+                className="flex items-center gap-1.5 text-xs font-mono text-muted hover:text-white transition-colors group w-fit"
             >
                 <span>{value}</span>
                 {copied ? (
@@ -77,12 +77,12 @@ export default function IndexerCard({ status, liveBlock }: Props) {
                     <div className="flex items-center gap-1.5">
                         <span className="text-xl font-bold font-heading text-white tabular-nums">{block.toLocaleString()}</span>
                         {isLive && (
-                            <span className="text-[10px] font-semibold text-success bg-success/10 border border-success/20 rounded px-1.5 py-0.5 animate-pulse">
+                            <span className="text-3xs font-semibold text-success bg-success/10 border border-success/20 rounded px-1.5 py-0.5 animate-pulse">
                                 LIVE
                             </span>
                         )}
                     </div>
-                    <span className="text-[10px] uppercase tracking-widest text-subtle">Last Processed Block</span>
+                    <span className="text-3xs uppercase tracking-widest text-subtle">Last Processed Block</span>
                 </div>
             </div>
 
@@ -92,14 +92,14 @@ export default function IndexerCard({ status, liveBlock }: Props) {
                     <Users size={14} className="text-accent shrink-0" />
                     <div>
                         <div className="text-base font-bold text-white tabular-nums">{(status.agentCount ?? 0).toLocaleString()}</div>
-                        <div className="text-[10px] uppercase tracking-widest text-subtle">Agents</div>
+                        <div className="text-3xs uppercase tracking-widest text-subtle">Agents</div>
                     </div>
                 </div>
                 <div className="flex items-center gap-2.5 bg-white/[0.03] rounded-lg px-3 py-2.5 border border-border/50">
                     <MessageSquare size={14} className="text-success shrink-0" />
                     <div>
                         <div className="text-base font-bold text-white tabular-nums">{(status.feedbackCount ?? 0).toLocaleString()}</div>
-                        <div className="text-[10px] uppercase tracking-widest text-subtle">Feedbacks</div>
+                        <div className="text-3xs uppercase tracking-widest text-subtle">Feedbacks</div>
                     </div>
                 </div>
             </div>
@@ -113,7 +113,7 @@ export default function IndexerCard({ status, liveBlock }: Props) {
             )}
 
             {status.lastIndexedAt && (
-                <div className="flex items-center gap-1.5 text-[10px] text-subtle">
+                <div className="flex items-center gap-1.5 text-3xs text-subtle">
                     <Activity size={10} />
                     <span>Last indexed: {new Date(status.lastIndexedAt).toLocaleString()}</span>
                 </div>

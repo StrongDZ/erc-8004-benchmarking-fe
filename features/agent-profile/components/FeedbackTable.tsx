@@ -1,27 +1,32 @@
 'use client';
 import { FileText } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { api, Feedback, explorerUrl, truncateAddress } from '@/shared/api/client';
+import { api, Feedback, explorerUrl } from '@/shared/api/client';
 import { ensureHttpsUrl } from '@/shared/api/utils/format';
 import { DEFAULT_FEEDBACK_PAGE_SIZE } from '@/shared/constants/app';
 import { truncateFeedbackMiddle } from '@/shared/lib/feedbackDisplay';
 import { formatFeedbackTableDate } from '@/shared/lib/feedbackTimestamp';
 import {
   feedbackClassificationTitle,
+  feedbackFeatureTitle,
   resolveFeedbackDisplayCategory,
+  resolveFeedbackDisplayFeature,
 } from '@/shared/lib/feedbackClassification';
 import PageNavigation from '@/shared/ui/PageNavigation';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { Badge } from '@/shared/ui/Badge';
 import { LinkOutbound } from '@/shared/ui/LinkOutbound';
-import { FeedbackCategoryBadge, FeedbackValuePill, FeedbackContentCell } from '@/shared/ui/feedback';
+import { AddressLabel } from '@/shared/ui/AddressLabel';
+import {
+  FEEDBACK_FILTER_CATEGORIES,
+  feedbackCategoryFilterLabel,
+} from '@/shared/lib/feedback/feedbackCategories';
+import { FeedbackCategoryBadge, FeedbackFeatureBadge, FeedbackValuePill, FeedbackContentCell } from '@/shared/ui/feedback';
 
 interface Props {
   chainId: number;
   agentId: string;
 }
-
-const CATEGORIES = ['all', 'service_feedback', 'config_feedback', 'app_specific', 'junk', 'others'] as const;
 
 const PAGE_SIZE = DEFAULT_FEEDBACK_PAGE_SIZE;
 
@@ -58,7 +63,7 @@ export default function FeedbackTable({ chainId, agentId }: Props) {
         </h3>
         <div className="overflow-x-auto">
           <div className="tabs">
-            {CATEGORIES.map((c) => (
+            {FEEDBACK_FILTER_CATEGORIES.map((c) => (
               <button
                 key={c}
                 type="button"
@@ -68,7 +73,7 @@ export default function FeedbackTable({ chainId, agentId }: Props) {
                   setPage(1);
                 }}
               >
-                {c === 'all' ? 'All' : c.replace('_', ' ')}
+                {feedbackCategoryFilterLabel(c)}
               </button>
             ))}
           </div>
@@ -130,11 +135,18 @@ export default function FeedbackTable({ chainId, agentId }: Props) {
                       #{fb.feedbackIndex}
                     </td>
                     <td className="px-2 py-2.5 align-middle">
-                      <FeedbackCategoryBadge
-                        category={resolveFeedbackDisplayCategory(fb.classification)}
-                        title={feedbackClassificationTitle(fb.classification)}
-                        badgeSize="xs"
-                      />
+                      <div className="flex flex-wrap items-center gap-1">
+                        <FeedbackCategoryBadge
+                          category={resolveFeedbackDisplayCategory(fb.classification)}
+                          title={feedbackClassificationTitle(fb.classification)}
+                          badgeSize="xs"
+                        />
+                        <FeedbackFeatureBadge
+                          feature={resolveFeedbackDisplayFeature(fb.classification)}
+                          title={feedbackFeatureTitle(fb.classification)}
+                          badgeSize="xs"
+                        />
+                      </div>
                     </td>
                     <td className="px-2 py-2.5 align-middle">
                       {isRevoked ? (
@@ -156,13 +168,10 @@ export default function FeedbackTable({ chainId, agentId }: Props) {
                       </span>
                     </td>
                     <td className="max-w-0 px-2 py-2.5 align-middle">
-                      <LinkOutbound
-                        href={`/wallet/${fb.clientAddress}`}
+                      <AddressLabel
+                        address={fb.clientAddress}
                         className="block w-full min-w-0 font-mono text-xs text-muted hover:text-primary truncate"
-                        title={fb.clientAddress}
-                      >
-                        {truncateAddress(fb.clientAddress)}
-                      </LinkOutbound>
+                      />
                     </td>
                     <td className="whitespace-nowrap px-2 py-2.5 align-middle text-xs text-subtle">
                       {formatFeedbackTableDate(fb.timestamp, fb.timestampUnix)}

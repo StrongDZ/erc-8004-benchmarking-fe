@@ -5,6 +5,7 @@ import type {
     LeaderboardStats,
     RisingStar,
     TagCount,
+    WalletRankingRow,
 } from '@/shared/api/types';
 
 function buildLeaderboardParams(q: LeaderboardQuery): URLSearchParams {
@@ -75,5 +76,13 @@ export const leaderboardApi = {
         const p = new URLSearchParams();
         if (chainIds.length) p.set('chainId', chainIds.join(','));
         return apiFetch<LeaderboardStats>(`/leaderboard/stats?${p}`);
+    },
+
+    walletRanking: (chainIds: number[], page = 1, limit = 50) => {
+        const p = new URLSearchParams();
+        if (chainIds.length) p.set('chainId', chainIds.join(','));
+        p.set('page', String(page));
+        p.set('limit', String(limit));
+        return apiFetch<WalletRankingRow[]>(`/leaderboard/wallet-ranking?${p}`);
     },
 };

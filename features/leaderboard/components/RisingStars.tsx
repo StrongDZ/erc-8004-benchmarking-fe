@@ -153,7 +153,7 @@ export default function RisingStars({ chainIds }: Props) {
                                                 className="h-12 w-12 rounded-full border border-border object-cover transition-colors group-hover:border-primary/70"
                                             />
                                             <span
-                                                className={`absolute -bottom-1 -right-1 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded px-1 text-[10px] font-bold leading-none ${
+                                                className={`absolute -bottom-1 -right-1 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded px-1 text-3xs font-bold leading-none ${
                                                     idx === 0
                                                         ? 'bg-primary text-black'
                                                         : idx === 1
@@ -186,12 +186,12 @@ export default function RisingStars({ chainIds }: Props) {
                                         </div>
                                     </div>
                                     <div className="mt-auto flex items-end justify-between gap-2 border-t border-white/5 pt-3">
-                                        <div className="text-[11px] text-muted">
+                                        <div className="text-2xs text-muted">
                                             Score{' '}
                                             <span className="font-semibold tabular-nums text-white">
                                                 {star.scoreNow.toFixed(1)}
                                             </span>
-                                            <span className="text-[10px] text-subtle ml-0.5">/100</span>
+                                            <span className="text-3xs text-subtle ml-0.5">/100</span>
                                         </div>
                                         <div className="flex items-center gap-1 text-xs font-semibold text-success">
                                             <TrendingUp size={14} className="shrink-0" />

@@ -133,7 +133,7 @@ export function RegistrationBadge({ currentChainId, currentAgentId }: Props) {
 
     if (n === 1) {
         return (
-            <span className="inline-flex items-center gap-1.5 badge badge-muted border rounded-full text-[11px] px-2.5 py-1 uppercase tracking-wide font-semibold">
+            <span className="inline-flex items-center gap-1.5 badge badge-muted border rounded-full text-2xs px-2.5 py-1 uppercase tracking-wide font-semibold">
                 <ChainIcon chainId={regs[0].chainId} size={13} />
                 Registered on {firstChain.name}
             </span>
@@ -144,7 +144,7 @@ export function RegistrationBadge({ currentChainId, currentAgentId }: Props) {
         <div ref={containerRef} className="relative inline-flex">
             <button
                 onClick={() => setOpen(v => !v)}
-                className="inline-flex items-center gap-1.5 badge badge-muted border rounded-full text-[11px] px-2.5 py-1 uppercase tracking-wide font-semibold hover:border-primary/50 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 badge badge-muted border rounded-full text-2xs px-2.5 py-1 uppercase tracking-wide font-semibold hover:border-primary/50 transition-colors cursor-pointer"
             >
                 {regs.slice(0, 2).map(r => (
                     <ChainIcon key={r.chainId} chainId={r.chainId} size={13} />

@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1
 # Dev image — Next.js with hot reload. Source is bind-mounted at runtime
 # (see docker-compose.yaml), so edits on the host trigger rebuilds inside.
 

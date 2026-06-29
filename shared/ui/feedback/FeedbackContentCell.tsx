@@ -73,7 +73,7 @@ export function FeedbackContentCell({ comment = '', attachments = [] }: Feedback
                key={i}
                type="button"
                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-               className="inline-flex items-center gap-1 text-[10px] bg-white/5 hover:bg-white/10 text-muted px-1.5 py-0.5 rounded transition-colors border border-white/5"
+               className="inline-flex items-center gap-1 text-3xs bg-white/5 hover:bg-white/10 text-muted px-1.5 py-0.5 rounded transition-colors border border-white/5"
                title={att.name || 'Attachment'}
              >
                <Paperclip size={10} className="shrink-0" />
@@ -84,15 +84,15 @@ export function FeedbackContentCell({ comment = '', attachments = [] }: Feedback
              <button
                type="button"
                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-               className="inline-flex items-center text-[10px] bg-white/5 hover:bg-white/10 text-muted px-1.5 py-0.5 rounded transition-colors border border-white/5"
+               className="inline-flex items-center text-3xs bg-white/5 hover:bg-white/10 text-muted px-1.5 py-0.5 rounded transition-colors border border-white/5"
              >
                +{hiddenCount}
              </button>
           )}
 
           {isPopoverOpen && (
-            <div className="absolute top-full left-0 mt-1 z-[9999] min-w-[12rem] max-w-[16rem] bg-[#1a1b1e] border border-border rounded-lg shadow-xl py-1 px-1 flex flex-col gap-1">
-              <div className="text-[10px] uppercase font-semibold text-subtle px-2 py-1 border-b border-border/50">Attachments</div>
+            <div className="absolute top-full left-0 mt-1 z-[9999] min-w-[12rem] max-w-[16rem] bg-elevated border border-border rounded-lg shadow-xl py-1 px-1 flex flex-col gap-1">
+              <div className="text-3xs uppercase font-semibold text-subtle px-2 py-1 border-b border-border/50">Attachments</div>
               <div className="max-h-[12rem] overflow-y-auto flex flex-col gap-0.5">
                 {attachments.map((att, idx) => {
                   const href = att.uri ? resolveIPFS(att.uri) : '#';

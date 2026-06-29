@@ -16,7 +16,8 @@ export function truncateAddress(addr: string, chars = 6): string {
     return `${addr.slice(0, chars)}...${addr.slice(-4)}`;
 }
 
-export function formatScore(s: number): string {
+export function formatScore(s: number | null | undefined, emptyLabel = '—'): string {
+    if (s == null || Number.isNaN(s)) return emptyLabel;
     return s.toFixed(1);
 }
 

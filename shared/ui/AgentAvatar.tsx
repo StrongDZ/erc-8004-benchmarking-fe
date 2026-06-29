@@ -23,6 +23,7 @@ function makeRng(seed: number) {
 }
 
 function hashSeed(value: string): number {
+  if (!value) return 0;
   let h = 7;
   for (let i = 0; i < value.length; i++) h = (Math.imul(31, h) + value.charCodeAt(i)) >>> 0;
   return h;

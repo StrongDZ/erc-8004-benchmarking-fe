@@ -36,12 +36,12 @@ export default function KpiCard({ label, value, sub, icon, color = 'primary' }: 
   const display = isNum ? counted : value;
 
   return (
-    <div className={`card overflow-hidden flex items-center pr-4 pl-5 py-5 gap-4 hover:border-border/80 transition-colors`}>
+    <div className={`card overflow-hidden flex items-center px-5 py-5 gap-4 hover:border-border/80 transition-colors`}>
       <div className={`flex items-center justify-center min-w-[48px] w-12 h-12 rounded-xl border bg-black/40 ${color === 'primary' ? 'text-primary border-primary/20' : color === 'success' ? 'text-success border-success/20' : color === 'accent' ? 'text-accent border-accent/20' : 'text-danger border-danger/20'}`}>
         {icon}
       </div>
       <div className="flex flex-col min-w-0 pr-2">
-        <span className="text-3xl font-bold font-heading text-white tracking-tight leading-none mb-1">
+        <span className="text-3xl font-bold font-heading text-white tracking-tight leading-none mb-1 tabular-nums">
           {typeof display === 'number' ? display.toLocaleString() : display}
         </span>
         <span className="text-sm font-medium text-muted uppercase tracking-wide truncate">

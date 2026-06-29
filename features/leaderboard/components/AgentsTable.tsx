@@ -5,11 +5,12 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AgentService, Chain, LeaderboardAgent, truncateAddress } from "@/shared/api/client";
+import { AgentService, Chain, LeaderboardAgent } from "@/shared/api/client";
 import { DEFAULT_FEEDBACK_PAGE_SIZE } from "@/shared/constants/app";
 import { Badge } from "@/shared/ui/Badge";
 import { ChainBadge } from "@/shared/ui/ChainBadge";
 import { AgentAvatar } from "@/shared/ui/AgentAvatar";
+import { AddressLabel } from '@/shared/ui/AddressLabel';
 
 interface Props {
     agents: LeaderboardAgent[];
@@ -45,7 +46,7 @@ function serviceCell(services?: AgentService[]) {
                     {s.name}
                 </Badge>
             ))}
-            {services.length > 3 && <span className="shrink-0 text-[10px] font-medium text-muted">+{services.length - 3}</span>}
+            {services.length > 3 && <span className="shrink-0 text-3xs font-medium text-muted">+{services.length - 3}</span>}
         </div>
     );
 }
@@ -86,6 +87,7 @@ function LoadingRows({ pageSize }: { pageSize: number }) {
                 <tr key={i} className="pointer-events-none">
                     <td className="max-w-0 px-4 py-2.5 align-middle">
                         <div className="flex min-w-0 items-center gap-2">
+                            <div className="skeleton h-4 w-6 shrink-0 rounded" style={{ animationDelay: `${i * 0.04}s` }} />
                             <div className="skeleton h-9 w-9 shrink-0 rounded-full" style={{ animationDelay: `${i * 0.04}s` }} />
                             <div className="min-w-0 flex-1 space-y-1.5 py-0.5">
                                 <div className="skeleton h-3.5 w-full max-w-[12rem] rounded" style={{ animationDelay: `${i * 0.04}s` }} />
@@ -168,6 +170,12 @@ export default function AgentsTable({ agents, chains = [], loading, pageSize = D
                         >
                             <td className="max-w-0 px-4 py-2.5 align-middle">
                                 <div className="flex min-w-0 items-center gap-2">
+                                    <span
+                                        className={`w-6 shrink-0 text-right text-xs font-bold tabular-nums ${a.rank <= 3 ? 'text-primary' : 'text-subtle'}`}
+                                        title={`Rank #${a.rank}`}
+                                    >
+                                        {a.rank}
+                                    </span>
                                     <AgentAvatar
                                         image={a.image}
                                         seed={a.agentId}
@@ -194,7 +202,7 @@ export default function AgentsTable({ agents, chains = [], loading, pageSize = D
                                                 )}
                                             </span>
                                         </div>
-                                        <span className="mt-0.5 block truncate text-[12px] leading-tight text-muted" title={`#${a.agentId}`}>
+                                        <span className="mt-0.5 block truncate text-xs leading-tight text-muted" title={`#${a.agentId}`}>
                                             #{a.agentId}
                                         </span>
                                     </div>
@@ -208,22 +216,19 @@ export default function AgentsTable({ agents, chains = [], loading, pageSize = D
                             <td className="max-w-0 px-4 py-2.5 align-middle">{serviceCell(a.services)}</td>
                             <td className="max-w-0 px-4 py-2.5 text-right align-middle whitespace-nowrap tabular-nums">
                                 <span className="font-bold text-primary">
-                                    {a.trustScore.toFixed(1)}<span className="text-[10px] font-normal text-muted ml-0.5">/100</span>
+                                    {a.trustScore.toFixed(1)}<span className="text-3xs font-normal text-muted ml-0.5">/100</span>
                                 </span>
                             </td>
                             <td className="max-w-0 px-4 py-2.5 text-right align-middle whitespace-nowrap tabular-nums text-white">
-                                {a.totalTasks.toLocaleString()}
+                                {a.totalFeedbacks.toLocaleString()}
                             </td>
                             <td className="max-w-0 min-w-0 px-4 py-2.5 align-middle">
                                 {a.owner ? (
-                                    <Link
-                                        href={`/wallet/${a.owner}`}
-                                        onClick={(e) => e.stopPropagation()}
+                                    <AddressLabel
+                                        address={a.owner}
                                         className="inline-flex w-full min-w-0 truncate font-mono text-xs text-muted hover:text-primary transition-colors"
-                                        title={a.owner}
-                                    >
-                                        {truncateAddress(a.owner)}
-                                    </Link>
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
                                 ) : (
                                     <span className="text-muted text-xs">—</span>
                                 )}

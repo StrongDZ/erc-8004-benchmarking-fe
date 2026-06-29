@@ -146,6 +146,53 @@ export interface OnchainMetadataValue {
     confidence?: string;
 }
 
+export interface ServiceX402Enrichment {
+    enabled: boolean;
+    chain?: string;
+    currency?: string;
+    fee?: string;
+    payTo?: string;
+}
+
+export interface ServiceProbeMeta {
+    status: number;
+    contentSize?: number;
+    sourceType?: string;
+    errorSummary?: string;
+}
+
+export interface ServiceEnrichment {
+    description?: string;
+    method?: string;
+    paymentRequired?: boolean;
+    protocol?: string;
+    toolCount?: number;
+    tools?: string[];
+    prompts?: string[];
+    skillPaths?: string[];
+    domainPaths?: string[];
+    provider?: string;
+    capabilities?: string[];
+    inputModes?: string[];
+    outputModes?: string[];
+    authSchemes?: string[];
+    pageTitle?: string;
+    pageDescription?: string;
+    pageImage?: string;
+    x402?: ServiceX402Enrichment;
+    probe?: ServiceProbeMeta;
+}
+
+export interface ServiceScoring {
+    reputationScore: number;
+    scoreUpdateAt: number;
+    consecutiveFails: number;
+    totalTasks: number;
+    totalPassed: number;
+    totalFailed: number;
+    successRate: number;
+}
+
 export interface ServiceOverview {
     name: string;
     endpoint?: string;
@@ -154,6 +201,8 @@ export interface ServiceOverview {
     domains?: string[];
     health: 'ok' | 'warning' | 'fail' | 'unknown';
     healthInfo?: string;
+    scoring?: ServiceScoring;
+    enrichment?: ServiceEnrichment;
 }
 
 export interface AgentOverview {
@@ -327,6 +376,27 @@ export interface WalletFeedback extends Feedback {
     agentName?: string;
 }
 
+export interface FeedbackClient {
+    clientAddress: string;
+    feedbackCount: number;
+    trustScore?: number | null;
+}
+
+export interface FeedbackAgent {
+    agentId: string;
+    chainId: number;
+    agentName?: string;
+    feedbackCount: number;
+    trustScore: number;
+}
+
+export interface WalletRankingRow {
+    address: string;
+    agents: LeaderboardAgent[];
+    trustScore: number | null;
+    feedbackTotalCount: number;
+}
+
 export interface WalletProfile {
     address: string;
     chainId: number;
@@ -339,6 +409,19 @@ export interface WalletProfile {
     feedbackJunkCount: number;
     junkRatio: number;
     ownedAgentIds?: string[];
+    externalScore: number | null;
+    externalComplete: boolean;
+    /** Resolved ENS primary name, e.g. "vitalik.eth". Empty when unresolved. */
+    ens?: string;
+    /** Resolved ENS avatar image URL. Empty when unresolved or no avatar set. */
+    ensAvatar?: string;
+}
+
+/** One row of GET /wallets/ens. Addresses with no resolved ENS name are omitted by the API. */
+export interface WalletENSRow {
+    address: string;
+    ens: string;
+    ensAvatar?: string;
 }
 
 export type { FeedbackClassification } from '@/shared/lib/feedbackClassification';

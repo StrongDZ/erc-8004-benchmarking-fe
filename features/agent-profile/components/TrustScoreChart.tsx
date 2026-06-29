@@ -13,16 +13,6 @@ function filterPoints(points: TrustScorePoint[], view: View): TrustScorePoint[] 
   return points.filter(p => new Date(p.timestamp).getUTCDate() === 1);
 }
 
-function niceYDomain(points: TrustScorePoint[]): [number, number] {
-  if (!points.length) return [0, 100];
-  const scores = points.map(p => p.score);
-  const rawMin = Math.min(...scores);
-  const rawMax = Math.max(...scores);
-  const lo = Math.floor(rawMin / 10) * 10;
-  const hi = Math.ceil(rawMax / 10) * 10;
-  return lo === hi ? [Math.max(0, lo - 10), Math.min(100, hi + 10)] : [lo, hi];
-}
-
 function axisFormatter(view: View) {
   return (value: number) => {
     const d = new Date(value);
@@ -37,7 +27,6 @@ export default function TrustScoreChart({ points }: Props) {
   const filtered = useMemo(() => filterPoints(points, view), [points, view]);
 
   const option = useMemo(() => {
-    const [yMin, yMax] = niceYDomain(filtered);
     const now = Date.now();
     const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
 
@@ -62,13 +51,11 @@ export default function TrustScoreChart({ points }: Props) {
       },
       yAxis: {
         type: 'value',
-        min: yMin,
-        max: yMax,
+        scale: true,
+        boundaryGap: ['10%', '10%'],
         axisLabel: {
           color: EC.axis,
           fontSize: 11,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          formatter: (v: any) => Number(v).toFixed(0),
         },
         axisLine: { show: false },
         axisTick: { show: false },
@@ -104,13 +91,13 @@ export default function TrustScoreChart({ points }: Props) {
           type: 'slider',
           bottom: 8,
           height: 20,
-          filterMode: 'none',
+          filterMode: 'weakFilter',
           ...(view === 'day'
             ? { startValue: thirtyDaysAgo, endValue: now }
             : { start: 0, end: 100 }),
           ...dataZoomBase,
         },
-        { type: 'inside', filterMode: 'none' },
+        { type: 'inside', filterMode: 'weakFilter' },
       ],
       series: [{
         type: 'line',

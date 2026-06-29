@@ -2,24 +2,40 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { truncateAddress, explorerUrl, resolveIPFS } from '@/shared/api/client';
+import { explorerUrl } from '@/shared/api/client';
 import { ensureHttpsUrl } from '@/shared/api/utils/format';
 import { feedbackEventTimeMs } from '@/shared/lib/feedbackTimestamp';
 import {
   feedbackClassificationTitle,
+  feedbackFeatureTitle,
   resolveFeedbackDisplayCategory,
+  resolveFeedbackDisplayFeature,
 } from '@/shared/lib/feedbackClassification';
 import { Badge } from '@/shared/ui/Badge';
-import { FeedbackCategoryBadge, FeedbackValuePill, FeedbackContentCell } from '@/shared/ui/feedback';
-import { feedbackValueContainerClass } from '@/shared/lib/feedback/feedbackMetricTone';
+import {
+  formatFeedbackScaledRaw,
+  formatFeedbackValuePillLabel,
+  truncateFeedbackMiddle,
+} from '@/shared/lib/feedbackDisplay';
+import { feedbackValueContainerClass, feedbackValueTextClass } from '@/shared/lib/feedback/feedbackMetricTone';
+import { FeedbackCategoryBadge, FeedbackContentCell, FeedbackFeatureBadge } from '@/shared/ui/feedback';
 import { LinkOutbound } from '@/shared/ui/LinkOutbound';
+import { AddressLabel } from '@/shared/ui/AddressLabel';
 import { AgentAvatar } from '@/shared/ui/AgentAvatar';
+import { WalletAvatar } from '@/shared/ui/WalletAvatar';
+import { ChainBadge } from '@/shared/ui/ChainBadge';
+import type { Chain } from '@/shared/api/types';
 import { FeedbackReplies } from './FeedbackReplies';
 import type { Feedback } from '@/shared/api/types';
 
 interface FeedbackCardProps {
   feedback: Feedback;
   chainId: number;
+  /** Agent profile: show feedback author. Wallet profile: show target agent. */
+  variant?: 'by-client' | 'to-agent';
+  agentId?: string;
+  agentName?: string;
+  chain?: Chain;
 }
 
 function relativeTime(ms: number | null): string {
@@ -35,7 +51,17 @@ function relativeTime(ms: number | null): string {
   return new Date(ms).toLocaleDateString();
 }
 
-export function FeedbackCard({ feedback: fb, chainId }: FeedbackCardProps) {
+export function FeedbackCard({
+  feedback: fb,
+  chainId,
+  variant = 'by-client',
+  agentId,
+  agentName,
+  chain,
+}: FeedbackCardProps) {
+  const showAgent = variant === 'to-agent' && agentId;
+  const agentTitle = agentName ?? (agentId ? `Agent #${agentId}` : '');
+  const avatarSeed = showAgent ? `${chainId}-${agentId}` : null;
   const [contentExpanded, setContentExpanded] = useState(false);
 
   const isRevoked = !!fb.revokeTxHash;
@@ -47,9 +73,9 @@ export function FeedbackCard({ feedback: fb, chainId }: FeedbackCardProps) {
 
   const tag1 = fb.tag1?.trim();
   const tag2 = fb.tag2?.trim();
-  const tagLabel = [tag1, tag2].filter(Boolean).join(' | ');
+  const hasBothTags = !!(tag1 && tag2);
 
-  const hasVia = !!fb.endpoint?.trim();
+  const hasVia = !!(fb.endpoint?.trim() || fb.feedbackURI);
 
   return (
     <div
@@ -63,26 +89,46 @@ export function FeedbackCard({ feedback: fb, chainId }: FeedbackCardProps) {
       {/* ── Header ── */}
       <div className="flex items-start gap-3">
 
-        {/* Avatar */}
-        <AgentAvatar seed={fb.clientAddress} size={34} className="mt-0.5" />
+        {showAgent ? (
+          <AgentAvatar seed={avatarSeed!} size={40} className="mt-0.5 shrink-0" />
+        ) : (
+          <WalletAvatar address={fb.clientAddress} size={40} className="mt-0.5 shrink-0" />
+        )}
 
         {/* Left info block */}
         <div className="min-w-0 flex-1">
-          {/* Row 1: address + index + category */}
+          {/* Row 1: subject + index + category */}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-            <Link
-              href={`/wallet/${fb.clientAddress}`}
-              className="font-mono text-xs text-white hover:text-primary transition-colors truncate"
-              title={fb.clientAddress}
-            >
-              {truncateAddress(fb.clientAddress)}
-            </Link>
-            <span className="font-mono text-[11px] text-subtle tabular-nums">
+            {showAgent ? (
+              <Link
+                href={`/agents/${chainId}/${agentId}`}
+                className="text-sm font-semibold text-white hover:text-primary transition-colors truncate"
+                title={agentTitle}
+              >
+                {agentTitle}
+              </Link>
+            ) : (
+              <AddressLabel
+                address={fb.clientAddress}
+                showAvatar={false}
+                chars={8}
+                className="font-mono text-sm font-semibold text-white hover:text-primary transition-colors truncate"
+              />
+            )}
+            {showAgent && (
+              <ChainBadge chainId={chainId} chain={chain} size="sm" />
+            )}
+            <span className="font-mono text-xs text-subtle tabular-nums">
               #{fb.feedbackIndex}
             </span>
             <FeedbackCategoryBadge
               category={resolveFeedbackDisplayCategory(fb.classification)}
               title={feedbackClassificationTitle(fb.classification)}
+              badgeSize="xs"
+            />
+            <FeedbackFeatureBadge
+              feature={resolveFeedbackDisplayFeature(fb.classification)}
+              title={feedbackFeatureTitle(fb.classification)}
               badgeSize="xs"
             />
             {isRevoked && (
@@ -96,16 +142,16 @@ export function FeedbackCard({ feedback: fb, chainId }: FeedbackCardProps) {
               <LinkOutbound
                 href={explorerUrl(chainId, fb.txHash)}
                 external
-                className="font-mono text-[11px] text-subtle hover:text-muted transition-colors"
+                className="font-mono text-xs text-subtle hover:text-muted transition-colors"
                 title={fb.txHash}
               >
                 {fb.txHash.slice(0, 8)}…{fb.txHash.slice(-6)}
               </LinkOutbound>
             )}
-            {fb.txHash && ms !== null && <span className="text-subtle/50 text-[11px]">·</span>}
+            {fb.txHash && ms !== null && <span className="text-subtle/50 text-xs">·</span>}
             {ms !== null && (
               <span
-                className="text-[11px] text-subtle"
+                className="text-xs text-subtle"
                 title={new Date(ms).toLocaleString()}
               >
                 {relativeTime(ms)}
@@ -113,56 +159,83 @@ export function FeedbackCard({ feedback: fb, chainId }: FeedbackCardProps) {
             )}
           </div>
 
-          {/* Via line — only rendered when endpoint is present */}
+          {/* Row 3+: endpoint + feedback URI (stacked) */}
           {hasVia && (
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-[11px] text-subtle/60 shrink-0">via</span>
-              <span className="w-[10rem] min-w-0 shrink-0">
-                <LinkOutbound
-                  href={ensureHttpsUrl(fb.endpoint!)}
-                  external
-                  className="font-mono text-[11px] text-subtle hover:text-muted transition-colors w-full"
-                  title={fb.endpoint}
-                >
-                  {fb.endpoint!.replace(/^https?:\/\//, '')}
-                </LinkOutbound>
-              </span>
+            <div className="mt-1 flex flex-col gap-0.5">
+              {fb.endpoint?.trim() && (
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="shrink-0 text-xs text-subtle/60">Endpoint:</span>
+                  <LinkOutbound
+                    href={ensureHttpsUrl(fb.endpoint)}
+                    external
+                    className="min-w-0 font-mono text-xs text-subtle hover:text-muted transition-colors truncate max-w-[15rem]"
+                    title={fb.endpoint}
+                  >
+                    {fb.endpoint.replace(/^https?:\/\//, '')}
+                  </LinkOutbound>
+                </div>
+              )}
               {fb.feedbackURI && (
-                <LinkOutbound
-                  href={resolveIPFS(fb.feedbackURI)}
-                  external
-                  className="text-[11px] text-subtle hover:text-accent transition-colors shrink-0"
-                  title={fb.feedbackURI}
-                >
-                  URI
-                </LinkOutbound>
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="shrink-0 text-xs text-subtle/60">Feedback URI:</span>
+                  <LinkOutbound
+                    href={`/feedback-uri?uri=${encodeURIComponent(fb.feedbackURI)}`}
+                    className="min-w-0 font-mono text-xs text-subtle hover:text-accent transition-colors truncate max-w-[15rem]"
+                    title={fb.feedbackURI}
+                  >
+                    {truncateFeedbackMiddle(fb.feedbackURI, 18, 10)}
+                  </LinkOutbound>
+                </div>
               )}
             </div>
           )}
         </div>
 
-        {/* Right panel — same color hue as value pill, wraps tags + value */}
+        {/* Right panel: tinted box (value tone) with tag + large score */}
         <div
           className={[
-            'shrink-0 ml-2 flex flex-col items-end gap-1.5 rounded-lg border px-3 py-2 min-w-[6rem]',
+            'shrink-0 ml-2 flex flex-col items-center gap-1 rounded-lg border px-3 py-2 min-w-[6rem]',
             feedbackValueContainerClass(fb, isRevoked),
           ].join(' ')}
         >
-          {tagLabel && (
-            <span
-              className="font-mono text-[11px] text-subtle/80 max-w-[10rem] truncate text-right w-full"
-              title={tagLabel}
-            >
-              {tagLabel}
-            </span>
+          {(tag1 || tag2) && (
+            hasBothTags ? (
+              <div
+                className="grid w-full min-w-0 max-w-[10rem] grid-cols-[1fr_auto_1fr] items-center gap-x-0.5"
+                title={`${tag1} | ${tag2}`}
+              >
+                <div className="flex min-w-0 justify-center overflow-hidden">
+                  <span className="truncate font-mono text-2xs text-subtle/80">{tag1}</span>
+                </div>
+                <span className="shrink-0 font-mono text-2xs text-subtle/50">|</span>
+                <div className="flex min-w-0 justify-center overflow-hidden">
+                  <span className="truncate font-mono text-2xs text-subtle/80">{tag2}</span>
+                </div>
+              </div>
+            ) : (
+              <span
+                className="w-full max-w-[10rem] truncate text-center font-mono text-2xs text-subtle/80"
+                title={tag1 || tag2}
+              >
+                {tag1 || tag2}
+              </span>
+            )
           )}
-          <FeedbackValuePill fb={fb} revoked={isRevoked} />
+          <span
+            className={[
+              'text-2xl font-bold tabular-nums leading-none text-center',
+              feedbackValueTextClass(fb, isRevoked),
+            ].join(' ')}
+            title={`raw=${fb.value ?? ''} · decimals=${fb.valueDecimals ?? 0} → ${formatFeedbackScaledRaw(fb)}`}
+          >
+            {formatFeedbackValuePillLabel(fb)}
+          </span>
         </div>
       </div>
 
       {/* ── Content (aligned with avatar) ── */}
       {hasContent && (
-        <div className="mt-3 pl-[46px]">
+        <div className="mt-3 pl-[52px]">
           {comment && (
             <div>
               <p

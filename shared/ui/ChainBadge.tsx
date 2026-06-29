@@ -51,7 +51,7 @@ export function ChainBadge({ chainId, chain, className = "", size = "sm" }: Chai
     const text = labelFor(chain, chainId);
     const color = chain?.brandColor;
 
-    const pad = size === "md" ? "py-1.5 pl-1.5 pr-3.5 gap-2.5 text-sm" : "py-1 pl-1 pr-2.5 gap-2 text-[12px] leading-tight";
+    const pad = size === "md" ? "py-1.5 pl-1.5 pr-3.5 gap-2.5 text-sm" : "py-1 pl-1 pr-2.5 gap-2 text-xs leading-tight";
 
     return (
         <span
