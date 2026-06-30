@@ -75,6 +75,8 @@ export default function WalletPage({ params }: { params: { address: string } }) 
                     interactedCount={interactedTotal}
                     trustScore={walletProfile?.trustScore}
                     externalScore={walletProfile?.externalScore}
+                    externalComplete={walletProfile?.externalComplete}
+                    externalFactors={walletProfile?.externalFactors}
                     kind={walletProfile?.kind}
                     feedbackValidCount={walletProfile?.feedbackValidCount}
                     feedbackJunkCount={walletProfile?.feedbackJunkCount}

@@ -49,3 +49,44 @@ export function computeCompositeFromBreakdown(
 export function clampScore(score: number): number {
     return Math.max(0, Math.min(100, score));
 }
+
+export type ScoreLevel = 'red' | 'yellow' | 'blue' | 'green';
+
+export function getScoreLevel(score: number | null | undefined): ScoreLevel {
+    if (score == null) return 'red';
+    if (score < 25) return 'red';
+    if (score < 50) return 'yellow';
+    if (score < 75) return 'blue';
+    return 'green';
+}
+
+export function getScoreColorClass(score: number | null | undefined): string {
+    const lvl = getScoreLevel(score);
+    switch (lvl) {
+        case 'red': return 'text-danger';
+        case 'yellow': return 'text-warning';
+        case 'blue': return 'text-blue-400';
+        case 'green': return 'text-success';
+    }
+}
+
+export function getScoreBgClass(score: number | null | undefined): string {
+    const lvl = getScoreLevel(score);
+    switch (lvl) {
+        case 'red': return 'bg-danger';
+        case 'yellow': return 'bg-warning';
+        case 'blue': return 'bg-blue-500';
+        case 'green': return 'bg-success';
+    }
+}
+
+export function getScoreCssVar(score: number | null | undefined): string {
+    const lvl = getScoreLevel(score);
+    switch (lvl) {
+        case 'red': return 'var(--color-danger)';
+        case 'yellow': return 'var(--color-warning)';
+        case 'blue': return '#60a5fa';
+        case 'green': return 'var(--color-success)';
+    }
+}
+

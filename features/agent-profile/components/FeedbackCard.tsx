@@ -77,13 +77,21 @@ export function FeedbackCard({
 
   const hasVia = !!(fb.endpoint?.trim() || fb.feedbackURI);
 
+  // Power-user metadata surfaced via tooltip — keeps the pill itself minimal.
+  const valueTooltip = [
+    `raw=${fb.value ?? ''} · decimals=${fb.valueDecimals ?? 0} → ${formatFeedbackScaledRaw(fb)}`,
+    fb.valueScale ? `scale: ${fb.valueScale}` : '',
+    fb.vi || fb.wi ? `weight: vi ${fb.vi ?? 0} · wi ${fb.wi ?? 0}` : '',
+    fb.priceUSDC > 0 ? `price: ${fb.priceUSDC} USDC` : '',
+  ].filter(Boolean).join('\n');
+
   return (
     <div
       className={[
         'card rounded-xl border p-4 transition-colors',
         isRevoked
           ? 'opacity-60 border-red-500/20'
-          : 'border-white/5 hover:border-purple-500/20',
+          : 'border-white/5 hover:border-accent/25',
       ].join(' ')}
     >
       {/* ── Header ── */}
@@ -143,7 +151,7 @@ export function FeedbackCard({
                 href={explorerUrl(chainId, fb.txHash)}
                 external
                 className="font-mono text-xs text-subtle hover:text-muted transition-colors"
-                title={fb.txHash}
+                title={fb.blockNumber ? `${fb.txHash}\nBlock #${fb.blockNumber}` : fb.txHash}
               >
                 {fb.txHash.slice(0, 8)}…{fb.txHash.slice(-6)}
               </LinkOutbound>
@@ -226,7 +234,7 @@ export function FeedbackCard({
               'text-2xl font-bold tabular-nums leading-none text-center',
               feedbackValueTextClass(fb, isRevoked),
             ].join(' ')}
-            title={`raw=${fb.value ?? ''} · decimals=${fb.valueDecimals ?? 0} → ${formatFeedbackScaledRaw(fb)}`}
+            title={valueTooltip}
           >
             {formatFeedbackValuePillLabel(fb)}
           </span>
@@ -250,7 +258,7 @@ export function FeedbackCard({
                 <button
                   type="button"
                   onClick={() => setContentExpanded((v) => !v)}
-                  className="mt-1 text-xs text-purple-400 hover:text-purple-300 transition-colors"
+                  className="mt-1 text-xs text-accent hover:text-primary transition-colors"
                 >
                   {contentExpanded ? 'Show less' : 'Show more'}
                 </button>

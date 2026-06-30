@@ -11,6 +11,7 @@ import { FALLBACK_AVATAR_DATA_URI } from '@/shared/constants/app';
 import { ChainBadge } from '@/shared/ui/ChainBadge';
 import PageNavigation from '@/shared/ui/PageNavigation';
 import { Skeleton } from '@/shared/ui/Skeleton';
+import { getScoreColorClass } from '@/shared/lib/compositeScore';
 
 const API_MAX = 50;
 const PAGE_SIZE = 15;
@@ -192,7 +193,7 @@ export default function RisingStarsTablePage() {
                                                 className="w-fit"
                                             />
                                         </td>
-                                        <td className="px-4 py-3 text-right font-semibold tabular-nums text-white">
+                                        <td className={`px-4 py-3 text-right font-semibold tabular-nums ${getScoreColorClass(star.scoreNow)}`}>
                                             {star.scoreNow.toFixed(1)}<span className="text-3xs font-normal text-muted ml-0.5">/100</span>
                                         </td>
                                         <td className="px-4 py-3 text-right">

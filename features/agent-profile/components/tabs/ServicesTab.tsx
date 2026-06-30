@@ -146,7 +146,11 @@ function ServicesSummaryBar({
                             return (
                                 <div
                                     key={key}
-                                    className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 ${meta.chip}`}
+                                    className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 transition-opacity ${
+                                        count === 0
+                                            ? 'border-white/8 bg-white/[0.02] text-subtle/60 opacity-50'
+                                            : meta.chip
+                                    }`}
                                 >
                                     <meta.Icon size={14} className="shrink-0" />
                                     <span className="text-3xs uppercase tracking-wider font-semibold opacity-90">
@@ -286,7 +290,7 @@ function ServiceDetails({
     const description = getServiceDescription(svc);
 
     return (
-        <div className="space-y-2">
+        <div className="space-y-2 flex-1 flex flex-col">
             {description && (
                 <p className="text-sm text-muted leading-relaxed">{description}</p>
             )}
@@ -327,16 +331,20 @@ function ServiceDetails({
                 </div>
             )}
             {svc.endpoint ? (
-                <LinkOutbound
-                    href={ensureHttpsUrl(svc.endpoint)}
-                    external
-                    className="text-xs text-accent hover:text-primary transition-colors font-mono"
-                >
-                    <Globe size={12} className="shrink-0 flex-none" aria-hidden />
-                    <span className="min-w-0 break-all">{svc.endpoint}</span>
-                </LinkOutbound>
+                <div className="mt-auto pt-2">
+                    <LinkOutbound
+                        href={ensureHttpsUrl(svc.endpoint)}
+                        external
+                        className="text-xs text-accent hover:text-primary transition-colors font-mono"
+                    >
+                        <Globe size={12} className="shrink-0 flex-none" aria-hidden />
+                        <span className="min-w-0 break-all">{svc.endpoint}</span>
+                    </LinkOutbound>
+                </div>
             ) : (
-                <span className="text-xs text-subtle">No endpoint declared</span>
+                <div className="mt-auto pt-2">
+                    <span className="text-xs text-subtle">No endpoint declared</span>
+                </div>
             )}
         </div>
     );
@@ -376,7 +384,7 @@ function ProtocolCard({
     const e = svc.enrichment;
 
     return (
-        <div className="card p-5 flex flex-col gap-3">
+        <div className="card p-5 flex flex-col gap-3 h-full">
             <div className="flex items-start justify-between gap-3 flex-wrap">
                 <div className="flex items-center gap-2.5 min-w-0">
                     <span className={`flex items-center justify-center w-8 h-8 rounded-lg border shrink-0 ${def.accent}`}>
@@ -385,7 +393,7 @@ function ProtocolCard({
                     <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-white font-medium text-sm">{def.label}</span>
-                            {svc.version && <Badge variant="muted" size="xs">v{svc.version}</Badge>}
+                            {svc.version && <Badge variant="muted" size="xs">v{svc.version.replace(/^v/i, '')}</Badge>}
                             {e?.method && <Badge variant="muted" size="xs">{e.method}</Badge>}
                             {e?.paymentRequired === true && <Badge variant="warning" size="xs">Paid</Badge>}
                             {e?.paymentRequired === false && <Badge variant="success" size="xs">Free</Badge>}
@@ -449,7 +457,7 @@ function CustomServicesCard({
                         <div className="min-w-0 flex-1 space-y-1">
                             <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-white font-medium text-sm truncate">{svc.name || 'Unnamed service'}</span>
-                                {svc.version && <Badge variant="muted" size="xs">v{svc.version}</Badge>}
+                                {svc.version && <Badge variant="muted" size="xs">v{svc.version.replace(/^v/i, '')}</Badge>}
                                 {e?.method && <Badge variant="muted" size="xs">{e.method}</Badge>}
                                 {e?.paymentRequired === true && <Badge variant="warning" size="xs">Paid</Badge>}
                                 {e?.paymentRequired === false && <Badge variant="success" size="xs">Free</Badge>}

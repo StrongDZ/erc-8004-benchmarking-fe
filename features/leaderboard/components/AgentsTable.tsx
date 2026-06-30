@@ -11,6 +11,7 @@ import { Badge } from "@/shared/ui/Badge";
 import { ChainBadge } from "@/shared/ui/ChainBadge";
 import { AgentAvatar } from "@/shared/ui/AgentAvatar";
 import { AddressLabel } from '@/shared/ui/AddressLabel';
+import { getScoreColorClass } from '@/shared/lib/compositeScore';
 
 interface Props {
     agents: LeaderboardAgent[];
@@ -215,7 +216,7 @@ export default function AgentsTable({ agents, chains = [], loading, pageSize = D
                             </td>
                             <td className="max-w-0 px-4 py-2.5 align-middle">{serviceCell(a.services)}</td>
                             <td className="max-w-0 px-4 py-2.5 text-right align-middle whitespace-nowrap tabular-nums">
-                                <span className="font-bold text-primary">
+                                <span className={`font-bold ${getScoreColorClass(a.trustScore)}`}>
                                     {a.trustScore.toFixed(1)}<span className="text-3xs font-normal text-muted ml-0.5">/100</span>
                                 </span>
                             </td>

@@ -7,6 +7,7 @@ import { Badge } from '@/shared/ui/Badge';
 import { ChainBadge } from '@/shared/ui/ChainBadge';
 import PageNavigation from '@/shared/ui/PageNavigation';
 import { AgentAvatar } from '@/shared/ui/AgentAvatar';
+import { getScoreColorClass } from '@/shared/lib/compositeScore';
 
 interface Props {
     agents: LeaderboardAgent[];
@@ -122,7 +123,7 @@ export default function OwnedAgentsSection({ agents, chains = [], loading, walle
                                                 </div>
                                             </td>
                                             <td className="px-4 py-2.5 text-right align-middle tabular-nums">
-                                                <span className="font-bold text-primary">
+                                                <span className={`font-bold ${getScoreColorClass(a.trustScore)}`}>
                                                     {a.trustScore.toFixed(1)}<span className="text-3xs font-normal text-muted ml-0.5">/100</span>
                                                 </span>
                                             </td>

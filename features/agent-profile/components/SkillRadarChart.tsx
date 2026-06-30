@@ -6,12 +6,9 @@ import { EC } from '@/features/agent-profile/lib/echarts-theme';
 interface Props { data: RadarData | null; }
 
 const AXES = [
-  { key: 'successRate',   label: 'Success Rate' },
-  { key: 'taskVolume',    label: 'Task Volume' },
-  { key: 'avgDifficulty', label: 'Avg Difficulty' },
-  { key: 'scoreVelocity', label: 'Velocity' },
-  { key: 'domainDepth',   label: 'Domain Depth' },
-  { key: 'consistency',   label: 'Consistency' },
+  { key: 'successRate', label: 'Success Rate' },
+  { key: 'taskVolume',  label: 'Task Volume' },
+  { key: 'consistency', label: 'Consistency' },
 ] as const;
 
 export default function AgentRadarChart({ data }: Props) {
@@ -50,7 +47,21 @@ export default function AgentRadarChart({ data }: Props) {
     },
     series: [{
       type: 'radar',
-      data: [{ value: values, name: 'Agent' }],
+      data: [{
+        value: values,
+        name: 'Agent',
+        label: {
+          show: true,
+          color: '#94A3B8',
+          fontSize: 10,
+          fontWeight: 600,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          formatter: (p: any) => {
+            const v = Array.isArray(p.value) ? p.value[p.dimensionIndex ?? 0] : p.value;
+            return `${v}%`;
+          },
+        },
+      }],
       lineStyle: { color: EC.accent, width: 2 },
       itemStyle: { color: EC.accent },
       areaStyle: {
@@ -64,19 +75,10 @@ export default function AgentRadarChart({ data }: Props) {
   };
 
   return (
-    <div className="card p-5">
+    <div className="card p-5 h-full flex flex-col">
       <h3 className="font-heading text-lg text-white mb-3">Skill Radar</h3>
-      <ReactECharts option={option} style={{ height: 260 }} />
-      <div className="flex flex-col gap-1.5 mt-3">
-        {AXES.map((a, i) => (
-          <div key={a.key} className="flex items-center gap-2 text-xs">
-            <span className="w-32 text-muted">{a.label}</span>
-            <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
-              <div className="h-full bg-accent" style={{ width: `${values[i]}%` }} />
-            </div>
-            <span className="w-10 text-right tabular-nums text-muted">{values[i]}%</span>
-          </div>
-        ))}
+      <div className="flex-1 flex items-center justify-center min-h-[200px]">
+        <ReactECharts option={option} style={{ height: 240, width: '100%' }} />
       </div>
     </div>
   );

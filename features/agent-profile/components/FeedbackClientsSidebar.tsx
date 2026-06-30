@@ -6,6 +6,7 @@ import type { FeedbackClient } from '@/shared/api/types';
 import { DEFAULT_FEEDBACK_PAGE_SIZE } from '@/shared/constants/app';
 import { AddressLabel } from '@/shared/ui/AddressLabel';
 import { PaginatedSidebarCard } from '@/shared/ui/PaginatedSidebarCard';
+import { getScoreColorClass } from '@/shared/lib/compositeScore';
 
 interface Props {
   chainId: number;
@@ -25,7 +26,7 @@ function ClientRow({ row }: { row: FeedbackClient }) {
                     className="min-w-0 truncate font-mono text-white group-hover:text-primary transition-colors"
                 />
                 <span className="flex shrink-0 flex-col items-end gap-0.5">
-                    <span className="font-heading text-sm font-bold tabular-nums text-primary leading-none">
+                    <span className={`font-heading text-sm font-bold tabular-nums leading-none ${getScoreColorClass(row.trustScore)}`}>
                         {formatScore(row.trustScore)}
                         <span className="text-3xs font-normal text-muted ml-0.5">/100</span>
                     </span>

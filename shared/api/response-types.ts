@@ -332,6 +332,8 @@ export interface IndexerWorkerStatus {
         blockNumber: number;
         logIndex: number;
     };
+    /** Unix seconds of the worker's last heartbeat; absent/0 when down. */
+    lastSeen?: number;
 }
 
 export interface IndexerStatusResponse {
@@ -397,6 +399,20 @@ export interface WalletRankingRow {
     feedbackTotalCount: number;
 }
 
+/** One weighted component of the on-chain credit (external) score. */
+export interface ExternalScoreFactor {
+    /** age | counterparties | balance | activity | ens */
+    key: string;
+    /** nominal weight in [0,1] (factors sum to 1.0 when all present) */
+    weight: number;
+    /** normalized strength [0,100] */
+    score: number;
+    /** whether the underlying on-chain feature was fetched yet */
+    present: boolean;
+    /** raw magnitude: age days / count / USD / nonce / 1|0 for ENS */
+    raw: number;
+}
+
 export interface WalletProfile {
     address: string;
     chainId: number;
@@ -411,6 +427,8 @@ export interface WalletProfile {
     ownedAgentIds?: string[];
     externalScore: number | null;
     externalComplete: boolean;
+    /** Per-factor decomposition of externalScore; present only once enrichment ran. */
+    externalFactors?: ExternalScoreFactor[];
     /** Resolved ENS primary name, e.g. "vitalik.eth". Empty when unresolved. */
     ens?: string;
     /** Resolved ENS avatar image URL. Empty when unresolved or no avatar set. */

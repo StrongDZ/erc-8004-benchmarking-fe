@@ -10,6 +10,7 @@ import { Badge } from '@/shared/ui/Badge';
 import { ChainBadge } from '@/shared/ui/ChainBadge';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { AgentAvatar } from '@/shared/ui/AgentAvatar';
+import { getScoreColorClass } from '@/shared/lib/compositeScore';
 
 interface Props {
     chainIds: number[];
@@ -188,7 +189,7 @@ export default function RisingStars({ chainIds }: Props) {
                                     <div className="mt-auto flex items-end justify-between gap-2 border-t border-white/5 pt-3">
                                         <div className="text-2xs text-muted">
                                             Score{' '}
-                                            <span className="font-semibold tabular-nums text-white">
+                                            <span className={`font-semibold tabular-nums ${getScoreColorClass(star.scoreNow)}`}>
                                                 {star.scoreNow.toFixed(1)}
                                             </span>
                                             <span className="text-3xs text-subtle ml-0.5">/100</span>

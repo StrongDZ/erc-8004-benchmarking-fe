@@ -8,6 +8,7 @@ import { DEFAULT_FEEDBACK_PAGE_SIZE } from '@/shared/constants/app';
 import { AgentAvatar } from '@/shared/ui/AgentAvatar';
 import { ChainBadge } from '@/shared/ui/ChainBadge';
 import { PaginatedSidebarCard } from '@/shared/ui/PaginatedSidebarCard';
+import { getScoreColorClass } from '@/shared/lib/compositeScore';
 
 interface Props {
   address: string;
@@ -88,7 +89,7 @@ export default function FeedbackAgentsSidebar({ address, chains = [] }: Props) {
                 </span>
               </span>
               <span className="flex shrink-0 flex-col items-end gap-0.5">
-                <span className="font-heading text-sm font-bold tabular-nums text-primary leading-none">
+                <span className={`font-heading text-sm font-bold tabular-nums leading-none ${getScoreColorClass(row.trustScore)}`}>
                   {formatScore(row.trustScore)}
                   <span className="text-3xs font-normal text-muted ml-0.5">/100</span>
                 </span>

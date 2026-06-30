@@ -18,9 +18,11 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<Api
             headers[key] = value;
         });
     }
+    // Spread init first so the merged headers (Content-Type + admin key + caller
+    // overrides, built above) win — otherwise init.headers would re-clobber them.
     const res = await fetch(`${API_BASE}${path}`, {
-        headers,
         ...init,
+        headers,
     });
     const json: ApiResponse<T> = await res.json();
     return json;

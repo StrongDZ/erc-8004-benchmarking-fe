@@ -4,6 +4,8 @@ import {
     DEFAULT_COMPOSITE_WEIGHTS,
     clampScore,
     computeCompositeFromBreakdown,
+    getScoreColorClass,
+    getScoreCssVar,
 } from '@/shared/lib/compositeScore';
 
 interface ScoreBreakdownPanelProps {
@@ -118,7 +120,6 @@ export function ScoreBreakdownPanel({
         0,
     );
 
-    const sumContrib = computeCompositeFromBreakdown(data, qualityPresent);
 
     return (
         <div className={`relative overflow-hidden ${isHero ? 'card-glass p-5' : 'card p-5'}`}>
@@ -139,18 +140,22 @@ export function ScoreBreakdownPanel({
                     <span className="font-mono text-xs text-muted">/100</span>
                 </div>
                 <div
-                    className="font-heading font-bold text-primary leading-none tabular-nums"
+                    className={`font-heading font-bold leading-none tabular-nums ${getScoreColorClass(compositeScore)}`}
                     style={{
                         fontSize: isHero ? '3.75rem' : '2.5rem',
-                        textShadow: '0 0 32px var(--color-primary-glow)',
+                        textShadow: `0 0 32px ${getScoreCssVar(compositeScore)}66`,
                     }}
                 >
                     {compositeScore.toFixed(1)}
                 </div>
-                <div className="score-bar-wrap mt-3">
+                <div className="score-bar-wrap mt-3" style={{ height: '5px' }}>
                     <div
-                        className="score-bar-fill gold"
-                        style={{ width: `${clampScore(compositeScore)}%` }}
+                        className="h-full rounded-[2px] transition-all duration-700"
+                        style={{ 
+                            width: `${clampScore(compositeScore)}%`,
+                            backgroundColor: getScoreCssVar(compositeScore),
+                            boxShadow: `0 0 10px ${getScoreCssVar(compositeScore)}66`
+                        }}
                     />
                 </div>
             </div>
@@ -223,15 +228,6 @@ export function ScoreBreakdownPanel({
                     })}
                 </div>
 
-                <div className="mt-5 pt-3 border-t border-dashed border-border-subtle flex items-center justify-between">
-                    <span className="font-heading text-3xs uppercase tracking-[0.28em] text-muted">
-                        Σ Total
-                    </span>
-                    <span className="font-heading font-bold text-primary text-base tabular-nums">
-                        {sumContrib.toFixed(1)}
-                        <span className="text-xs text-subtle ml-1">/100</span>
-                    </span>
-                </div>
 
                 {!qualityPresent && (
                     <p className="mt-3 text-3xs leading-relaxed text-subtle">

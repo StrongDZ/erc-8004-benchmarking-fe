@@ -9,6 +9,7 @@ import { useChain } from '@/providers/ChainProvider';
 import PageNavigation from '@/shared/ui/PageNavigation';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { AddressLabel } from '@/shared/ui/AddressLabel';
+import { getScoreColorClass } from '@/shared/lib/compositeScore';
 
 const PAGE_SIZE = 15;
 const MAX_AGENT_AVATARS = 3;
@@ -182,7 +183,7 @@ export default function WalletRankingTablePage() {
                                         </td>
                                         <td className="px-4 py-3 text-right tabular-nums">
                                             {row.trustScore !== null ? (
-                                                <span className="font-bold text-primary">
+                                                <span className={`font-bold ${getScoreColorClass(row.trustScore)}`}>
                                                     {row.trustScore.toFixed(1)}
                                                     <span className="text-3xs font-normal text-muted ml-0.5">/100</span>
                                                 </span>

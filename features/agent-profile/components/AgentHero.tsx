@@ -1,5 +1,5 @@
 'use client';
-import { AgentProfile, formatScore } from '@/shared/api/client';
+import { AgentProfile, formatScore, formatPercent } from '@/shared/api/client';
 import { AgentAvatar } from '@/shared/ui/AgentAvatar';
 import { CheckCircle, XCircle, Shield, Zap, TrendingDown } from 'lucide-react';
 import { LinkOutbound } from '@/shared/ui/LinkOutbound';
@@ -7,11 +7,28 @@ import { AddressLabel } from '@/shared/ui/AddressLabel';
 import { Badge } from '@/shared/ui/Badge';
 import { RegistrationBadge } from './RegistrationBadge';
 
+import { getScoreColorClass, getScoreCssVar } from '@/shared/lib/compositeScore';
+
 interface Props { profile: AgentProfile; chainId: number; }
+
+/** Relative "x ago" for a unix-seconds timestamp (score refresh time). */
+function updatedAgo(unixSec: number): string {
+  const diff = Date.now() - unixSec * 1000;
+  const m = Math.floor(diff / 60_000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  if (d < 30) return `${d}d ago`;
+  return new Date(unixSec * 1000).toLocaleDateString();
+}
 
 export default function AgentHero({ profile, chainId }: Props) {
   const s = profile.scoring;
   const scoreRing = (Math.min(100, s.trustScore) / 100) * 360;
+  const scoreCssVar = getScoreCssVar(s.trustScore);
+  const scoreColorClass = getScoreColorClass(s.trustScore);
 
   return (
     <div className="card grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8 p-6 md:p-8">
@@ -27,7 +44,7 @@ export default function AgentHero({ profile, chainId }: Props) {
           />
           <svg className="absolute inset-0 w-24 h-24 -rotate-0 pointer-events-none" viewBox="0 0 96 96">
             <circle cx="48" cy="48" r="44" fill="none" stroke="var(--color-border)" strokeWidth="4" />
-            <circle cx="48" cy="48" r="44" fill="none" stroke="var(--color-primary)" strokeWidth="4"
+            <circle cx="48" cy="48" r="44" fill="none" stroke={scoreCssVar} strokeWidth="4"
               strokeDasharray={`${(scoreRing / 360) * 276.5} 276.5`}
               strokeLinecap="round"
               transform="rotate(-90 48 48)"
@@ -56,6 +73,7 @@ export default function AgentHero({ profile, chainId }: Props) {
                 chars={10}
                 avatarSize={14}
                 className="min-w-0 max-w-full font-mono text-xs text-muted hover:text-primary transition-colors truncate"
+                onClick={(e) => e.stopPropagation()}
               />
             </div>
           )}
@@ -83,24 +101,31 @@ export default function AgentHero({ profile, chainId }: Props) {
       </div>
 
       {/* Right: Scoring stats */}
-      <div className="flex flex-col gap-4">
-        <div className="card-glass p-4 flex flex-col items-start">
-          <span className="text-5xl font-heading font-bold text-primary leading-none">
+      <div className="flex flex-col gap-4 justify-center">
+        <div className="card-glass p-6 flex flex-col items-start justify-center">
+          <span className={`text-5xl font-heading font-bold leading-none ${scoreColorClass}`}>
             {formatScore(s.trustScore)}
           </span>
           <span className="text-xs uppercase tracking-wider text-muted mt-2">
             TrustScore <span className="text-subtle">/100</span>
           </span>
-          <div className="score-bar-wrap w-full mt-3">
-            <div className="score-bar-fill gold" style={{ width: `${Math.min(100, s.trustScore)}%` }} />
+          <div className="score-bar-wrap w-full mt-3" style={{ height: '6px' }}>
+            <div 
+              className="h-full rounded-[2px] transition-all duration-700" 
+              style={{ 
+                width: `${Math.min(100, s.trustScore)}%`,
+                backgroundColor: scoreCssVar,
+                boxShadow: `0 0 10px ${scoreCssVar}66`
+              }} 
+            />
           </div>
+
           {s.penalty > 0 && (
-            <span className="mt-3 inline-flex items-center gap-1 rounded-full border border-danger/40 bg-danger/15 px-2.5 py-1 text-2xs font-semibold text-danger">
+            <span className="mt-4 inline-flex items-center gap-1 rounded-full border border-danger/40 bg-danger/15 px-2.5 py-1 text-2xs font-semibold text-danger">
               <TrendingDown size={11} /> -{s.penalty.toFixed(1)}% reliability penalty
             </span>
           )}
         </div>
-
       </div>
     </div>
   );

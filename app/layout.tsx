@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import Navbar from '@/shared/ui/Navbar';
+import SiteChrome from '@/shared/ui/SiteChrome';
 import { ChainProvider } from '@/providers/ChainProvider';
 import { SocketProvider } from '@/providers/SocketProvider';
 
@@ -20,10 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-background text-white antialiased min-h-screen">
         <ChainProvider>
           <SocketProvider>
-            <Navbar />
-            <main className="min-h-[calc(100vh-64px)] overflow-x-hidden pt-4 pb-12">
-              {children}
-            </main>
+            <SiteChrome>{children}</SiteChrome>
           </SocketProvider>
         </ChainProvider>
       </body>
