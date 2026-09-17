@@ -29,8 +29,7 @@ npm run lint
 
 ## Architecture notes
 
-- `providers/SocketProvider.tsx` owns a single `SocketClient` instance (auto-reconnect
-  + heartbeat); components subscribe via `useSocketEvent(type, handler)` or
-  `useRealtimeEvents()` for the ring-buffered decoded event feed.
-- `shared/api/client.ts` exposes `api.leaderboardQuery(...)` for multi-select
-  filters and `api.tags(...)` for the tag autocomplete.
+- `app/` — Next.js App Router pages: the leaderboard home, the rising-stars and wallet-ranking views, the agent profile (`agents/[chainId]/[id]`), the wallet profile (`wallet/[address]`), and the operational admin, indexer, and feedback-uri pages.
+- `features/` — self-contained slices for leaderboard, agent-profile, wallet-profile, indexer, and an admin operator console, each owning its components and view logic.
+- `shared/api/client.ts` — a single typed REST client that owns all interface definitions; feature components render but never call `fetch` directly.
+- `providers/SocketProvider.tsx` — one auto-reconnecting WebSocket connection; components subscribe through a `useSocketEvent` hook or a ring-buffered `useRealtimeEvents` feed.

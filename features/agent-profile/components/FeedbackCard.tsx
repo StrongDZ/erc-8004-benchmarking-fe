@@ -105,7 +105,8 @@ export function FeedbackCard({
 
         {/* Left info block */}
         <div className="min-w-0 flex-1">
-          {/* Row 1: subject + index + category */}
+          {/* Row 1: subject + category + feature. For the wallet-profile (to-agent)
+              variant the index + chain badge drop to the row below (see Row 1b). */}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
             {showAgent ? (
               <Link
@@ -123,12 +124,11 @@ export function FeedbackCard({
                 className="font-mono text-sm font-semibold text-white hover:text-primary transition-colors truncate"
               />
             )}
-            {showAgent && (
-              <ChainBadge chainId={chainId} chain={chain} size="sm" />
+            {!showAgent && (
+              <span className="font-mono text-xs text-subtle tabular-nums">
+                #{fb.feedbackIndex}
+              </span>
             )}
-            <span className="font-mono text-xs text-subtle tabular-nums">
-              #{fb.feedbackIndex}
-            </span>
             <FeedbackCategoryBadge
               category={resolveFeedbackDisplayCategory(fb.classification)}
               title={feedbackClassificationTitle(fb.classification)}
@@ -143,6 +143,16 @@ export function FeedbackCard({
               <Badge variant="danger" size="xs">Revoked</Badge>
             )}
           </div>
+
+          {/* Row 1b (to-agent only): index + chain badge under the agent name */}
+          {showAgent && (
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
+              <span className="font-mono text-xs text-subtle tabular-nums">
+                #{fb.feedbackIndex}
+              </span>
+              <ChainBadge chainId={chainId} chain={chain} size="sm" />
+            </div>
+          )}
 
           {/* Row 2: txHash · time */}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
